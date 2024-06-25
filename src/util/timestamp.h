@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arduino.h"
 #include "metrics.h"
 #include <chrono>
 #include <cstdint>
@@ -26,7 +27,7 @@ public:
     using namespace std::chrono;
     microseconds x =
         duration_cast<microseconds>(system_clock::now().time_since_epoch());
-    return Timestamp(x.count());
+    return Timestamp(micros());
   }
 
   Timestamp() = default;

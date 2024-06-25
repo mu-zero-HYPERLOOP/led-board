@@ -10,7 +10,7 @@ void fsm::begin() {
   fsm_last_transition = Timestamp::now();
 
   // for video!!
-  canzero_set_state(led_board_state_SHOW_STARTUP);
+  canzero_set_state(led_board_state_STARTUP);
   canzero_set_command(led_board_command_NONE);
 
 }
@@ -30,7 +30,7 @@ void fsm::update() {
     case led_board_state_INIT:
       break;
     case led_board_state_STARTUP:
-      next_state = states::startup(cmd, time_since_last_transition);
+      next_state = states::startup_ease_out(cmd, time_since_last_transition);
       break;
     }
 

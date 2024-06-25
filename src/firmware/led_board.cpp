@@ -4,21 +4,14 @@
 #include "core_pins.h"
 #include "pinout.h"
 
-Adafruit_NeoPixel strip_2;
-Adafruit_NeoPixel strip_3;
-Adafruit_NeoPixel strip_4;
-Adafruit_NeoPixel strip_5;
-Adafruit_NeoPixel strip_6;
-Adafruit_NeoPixel strip_7;
+Adafruit_NeoPixel led_board::strip_2 = Adafruit_NeoPixel(STRIP_2_NUM_PIXELS, (int16_t)LedPin::led_ctrl_2, NEO_BRG + NEO_KHZ800);
+Adafruit_NeoPixel led_board::strip_3 = Adafruit_NeoPixel(STRIP_3_NUM_PIXELS, (int16_t)LedPin::led_ctrl_3, NEO_BRG + NEO_KHZ800);
+Adafruit_NeoPixel led_board::strip_4 = Adafruit_NeoPixel(STRIP_4_NUM_PIXELS, (int16_t)LedPin::led_ctrl_4, NEO_BRG + NEO_KHZ800);
+Adafruit_NeoPixel led_board::strip_5 = Adafruit_NeoPixel(STRIP_5_NUM_PIXELS, (int16_t)LedPin::led_ctrl_5, NEO_BRG + NEO_KHZ800);
+Adafruit_NeoPixel led_board::strip_6 = Adafruit_NeoPixel(STRIP_6_NUM_PIXELS, (int16_t)LedPin::led_ctrl_6, NEO_BRG + NEO_KHZ800);
+Adafruit_NeoPixel led_board::strip_7 = Adafruit_NeoPixel(STRIP_7_NUM_PIXELS, (int16_t)LedPin::led_ctrl_7, NEO_BRG + NEO_KHZ800);
 
 void led_board::begin() {
-  strip_2 = Adafruit_NeoPixel(STRIP_2_NUM_PIXELS, (int16_t)LedPin::led_ctrl_2, NEO_GRB + NEO_KHZ800);
-  strip_3 = Adafruit_NeoPixel(STRIP_3_NUM_PIXELS, (int16_t)LedPin::led_ctrl_3, NEO_GRB + NEO_KHZ800);
-  strip_4 = Adafruit_NeoPixel(STRIP_4_NUM_PIXELS, (int16_t)LedPin::led_ctrl_4, NEO_GRB + NEO_KHZ800);
-  strip_5 = Adafruit_NeoPixel(STRIP_5_NUM_PIXELS, (int16_t)LedPin::led_ctrl_5, NEO_GRB + NEO_KHZ800);
-  strip_6 = Adafruit_NeoPixel(STRIP_6_NUM_PIXELS, (int16_t)LedPin::led_ctrl_6, NEO_GRB + NEO_KHZ800);
-  strip_7 = Adafruit_NeoPixel(STRIP_7_NUM_PIXELS, (int16_t)LedPin::led_ctrl_7, NEO_GRB + NEO_KHZ800);
-
   strip_2.begin();
   strip_3.begin();
   strip_4.begin();

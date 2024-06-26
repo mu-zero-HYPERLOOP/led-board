@@ -56,6 +56,7 @@ typedef struct {
 typedef enum {
   led_board_state_INIT = 0,
   led_board_state_STARTUP = 1,
+  led_board_state_LIFTOFF = 2,
 } led_board_state;
 typedef enum {
   sdc_status_OPEN = 0,

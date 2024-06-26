@@ -8,7 +8,6 @@
 #include "util/blends.hpp"
 
 static constexpr uint32_t COLOR = 0x0000ff;
-static constexpr uint32_t COLOR_MUZERO = 0x00ff71;
 static constexpr uint16_t num_pixels = led_board::STRIP_2_NUM_PIXELS;
 static constexpr float width = 0.2f;
 static constexpr Duration animation_time = 5_s;
@@ -31,8 +30,8 @@ led_board_state fsm::states::startup_ease_out(
     float x = i /(float) num_pixels; // x in [0,1)
     float my_color = 1.0f - sigmoid((x - t * (1 + 2 * width) + width) * 5 / width);
 
-    led_board::strip_2.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * COLOR_MUZERO));
-    led_board::strip_3.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * COLOR_MUZERO));
+    led_board::strip_2.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * led_board::COLOR_MUZERO));
+    led_board::strip_3.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * led_board::COLOR_MUZERO));
   }
 
   led_board::strip_2.show();

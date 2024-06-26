@@ -1,5 +1,6 @@
 #include "firmware/led_board.hpp"
 #include "canzero/canzero.h"
+#include "util/metrics.h"
 
 Adafruit_NeoPixel led_board::strip_2 = Adafruit_NeoPixel(STRIP_2_NUM_PIXELS, 0, 0);
 Adafruit_NeoPixel led_board::strip_3 = Adafruit_NeoPixel(STRIP_3_NUM_PIXELS, 0, 0);
@@ -17,4 +18,8 @@ void led_board::update() {
 
 void led_board::set_sdc(bool close) {
   canzero_set_sdc_status(close ? sdc_status_CLOSED : sdc_status_OPEN);
+}
+
+Temperature led_board::read_mcu_temperature() {
+  return Temperature(0);
 }

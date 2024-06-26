@@ -25,6 +25,20 @@ void led_board::begin() {
   strip_5.setBrightness(255);
   strip_6.setBrightness(255);
   strip_7.setBrightness(255);
+
+  strip_2.clear();
+  strip_3.clear();
+  strip_4.clear();
+  strip_5.clear();
+  strip_6.clear();
+  strip_7.clear();
+
+  strip_2.show();
+  strip_3.show();
+  strip_4.show();
+  strip_5.show();
+  strip_6.show();
+  strip_7.show();
 }
 
 void led_board::update() {

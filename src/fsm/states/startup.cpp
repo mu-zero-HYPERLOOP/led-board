@@ -31,8 +31,8 @@ led_board_state fsm::states::startup_ease_out(
     float x = i /(float) num_pixels; // x in [0,1)
     float my_color = 1.0f - sigmoid((x - t * (1 + 2 * width) + width) * 5 / width);
 
-    led_board::strip_2.setPixelColor(i, my_color * COLOR_MUZERO);
-    led_board::strip_3.setPixelColor(i, my_color * COLOR_MUZERO);
+    led_board::strip_2.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * COLOR_MUZERO));
+    led_board::strip_3.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * COLOR_MUZERO));
   }
 
   led_board::strip_2.show();

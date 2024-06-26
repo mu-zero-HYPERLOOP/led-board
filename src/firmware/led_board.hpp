@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/metrics.h"
 #include <Adafruit_NeoPixel.h>
 
 
@@ -26,6 +27,8 @@ void begin();
 void update();
 
 void set_sdc(bool close);
+
+Temperature read_mcu_temperature();
 
 }
 

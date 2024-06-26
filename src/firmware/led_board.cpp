@@ -3,6 +3,8 @@
 #include "canzero/canzero.h"
 #include "core_pins.h"
 #include "pinout.h"
+#include "util/metrics.h"
+#include <InternalTemperature.h>
 
 Adafruit_NeoPixel led_board::strip_2 = Adafruit_NeoPixel(STRIP_2_NUM_PIXELS, (int16_t)LedPin::led_ctrl_2, NEO_BRG + NEO_KHZ800);
 Adafruit_NeoPixel led_board::strip_3 = Adafruit_NeoPixel(STRIP_3_NUM_PIXELS, (int16_t)LedPin::led_ctrl_3, NEO_BRG + NEO_KHZ800);
@@ -49,3 +51,11 @@ void led_board::set_sdc(bool close) {
   digitalWrite(SDC_CTRL_PIN, close);
   canzero_set_sdc_status(close ? sdc_status_CLOSED : sdc_status_OPEN);
 }
+
+Temperature led_board::read_mcu_temperature() {
+  const float temp = InternalTemperature.readTemperatureC();
+  const float temp_kelvin = temp - 273.15f;
+  return Temperature(temp_kelvin);
+}
+
+

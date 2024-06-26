@@ -2,6 +2,7 @@
 #define CANZERO_H
 #include <cinttypes>
 #include <cstddef>
+#define MAX_DYN_HEARTBEATS 10
 typedef enum {
   node_id_gamepad = 0,
   node_id_mother_board = 1,
@@ -60,6 +61,16 @@ typedef enum {
   sdc_status_OPEN = 0,
   sdc_status_CLOSED = 1,
 } sdc_status;
+typedef enum {
+  error_flag_OK = 0,
+  error_flag_ERROR = 1,
+} error_flag;
+typedef enum {
+  error_level_OK = 0,
+  error_level_INFO = 1,
+  error_level_WARNING = 2,
+  error_level_ERROR = 3,
+} error_level;
 typedef struct {
   uint16_t m_year;
   uint8_t m_month;
@@ -68,6 +79,21 @@ typedef struct {
   uint8_t m_min;
   uint8_t m_sec;
 } date_time;
+typedef enum {
+  bool_t_FALSE = 0,
+  bool_t_TRUE = 1,
+} bool_t;
+typedef struct {
+  float m_info_thresh;
+  float m_info_timeout;
+  float m_warning_thresh;
+  float m_warning_timeout;
+  float m_error_thresh;
+  float m_error_timeout;
+  bool_t m_ignore_info;
+  bool_t m_ignore_warning;
+  bool_t m_ignore_error;
+} error_level_config;
 static const node_id CANZERO_NODE_ID = node_id_led_board;
 typedef struct {
   uint32_t id;
@@ -112,6 +138,26 @@ static inline sdc_status canzero_get_sdc_status() {
   extern sdc_status __oe_sdc_status;
   return __oe_sdc_status;
 }
+static inline double canzero_get_loop_frequency() {
+  extern double __oe_loop_frequency;
+  return __oe_loop_frequency;
+}
+static inline error_flag canzero_get_error_heartbeat_miss() {
+  extern error_flag __oe_error_heartbeat_miss;
+  return __oe_error_heartbeat_miss;
+}
+static inline float canzero_get_mcu_temperature() {
+  extern float __oe_mcu_temperature;
+  return __oe_mcu_temperature;
+}
+static inline error_level canzero_get_error_level_mcu_temperature() {
+  extern error_level __oe_error_level_mcu_temperature;
+  return __oe_error_level_mcu_temperature;
+}
+static inline error_level_config canzero_get_error_level_config_mcu_temperature() {
+  extern error_level_config __oe_error_level_config_mcu_temperature;
+  return __oe_error_level_config_mcu_temperature;
+}
 typedef struct {
   get_resp_header m_header;
   uint32_t m_data;
@@ -125,7 +171,12 @@ typedef struct {
   led_board_state m_state;
   sdc_status m_sdc_status;
 } canzero_message_led_board_stream_state;
-static const uint32_t canzero_message_led_board_stream_state_id = 0xBB;
+static const uint32_t canzero_message_led_board_stream_state_id = 0xDB;
+typedef struct {
+  error_flag m_error_heartbeat_miss;
+  error_level m_error_level_mcu_temperature;
+} canzero_message_led_board_stream_errors;
+static const uint32_t canzero_message_led_board_stream_errors_id = 0xBB;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
@@ -180,6 +231,25 @@ static inline void canzero_set_sdc_status(sdc_status value){
   __oe_sdc_status = value;
 }
 
+static inline void canzero_set_loop_frequency(double value){
+  extern double __oe_loop_frequency;
+  __oe_loop_frequency = value;
+}
+
+void canzero_set_error_heartbeat_miss(error_flag value);
+
+static inline void canzero_set_mcu_temperature(float value){
+  extern float __oe_mcu_temperature;
+  __oe_mcu_temperature = value;
+}
+
+void canzero_set_error_level_mcu_temperature(error_level value);
+
+static inline void canzero_set_error_level_config_mcu_temperature(error_level_config value){
+  extern error_level_config __oe_error_level_config_mcu_temperature;
+  __oe_error_level_config_mcu_temperature = value;
+}
+
 void canzero_send_config_hash();
 
 void canzero_send_build_time();
@@ -189,5 +259,15 @@ void canzero_send_state();
 void canzero_send_command();
 
 void canzero_send_sdc_status();
+
+void canzero_send_loop_frequency();
+
+void canzero_send_error_heartbeat_miss();
+
+void canzero_send_mcu_temperature();
+
+void canzero_send_error_level_mcu_temperature();
+
+void canzero_send_error_level_config_mcu_temperature();
 
 #endif

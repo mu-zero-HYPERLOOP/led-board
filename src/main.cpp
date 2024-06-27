@@ -17,6 +17,7 @@ int main() {
     fsm::update();
 
 
+    canzero_update_continue(canzero_get_time());
   }
 
 }

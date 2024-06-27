@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/metrics.h"
 #include <Adafruit_NeoPixel.h>
 
 
@@ -20,12 +21,15 @@ static constexpr uint16_t STRIP_5_NUM_PIXELS = 100;
 static constexpr uint16_t STRIP_6_NUM_PIXELS = 100;
 static constexpr uint16_t STRIP_7_NUM_PIXELS = 100;
 
+static constexpr uint32_t COLOR_MUZERO = 0x00ff71;
 
 void begin();
 
 void update();
 
 void set_sdc(bool close);
+
+Temperature read_mcu_temperature();
 
 }
 

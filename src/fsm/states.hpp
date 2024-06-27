@@ -11,4 +11,6 @@ led_board_state startup_ease_out(led_board_command cmd, Duration time_since_last
 
 led_board_state rainbow_hue(led_board_command cmd, Duration time_since_last_transition);
 
+led_board_state liftoff(led_board_command cmd, Duration time_since_last_transition);
+
 }

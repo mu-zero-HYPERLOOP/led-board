@@ -20,8 +20,8 @@ static constexpr float max_brightness = 1.0f;
 static constexpr uint16_t center = num_pixels / 2;
 static constexpr Duration pixel_offset = 200_ms;
 static constexpr uint32_t color_1 = led_board::COLOR_MUZERO;
-//static constexpr uint32_t color_2 = 0x0030c0;
-static constexpr uint32_t color_2 = 0xff0000;
+static constexpr uint32_t color_2 = 0x00c0c0;
+//static constexpr uint32_t color_2 = 0xff0000;
 
 
 led_board_state fsm::states::breathe_brightness(

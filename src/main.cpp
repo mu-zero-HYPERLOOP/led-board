@@ -25,6 +25,7 @@ int main() {
   canzero_update_continue(canzero_get_time());
 
   fsm::begin();
+  led_board::set_sdc(true);
 
   while (true) {
     canzero_can0_poll();

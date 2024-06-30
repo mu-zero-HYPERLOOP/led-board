@@ -14,6 +14,15 @@ Adafruit_NeoPixel led_board::strip_6 = Adafruit_NeoPixel(STRIP_6_NUM_PIXELS, (in
 Adafruit_NeoPixel led_board::strip_7 = Adafruit_NeoPixel(STRIP_7_NUM_PIXELS, (int16_t)LedPin::led_ctrl_7, NEO_BRG + NEO_KHZ800);
 
 void led_board::begin() {
+  pinMode(static_cast<uint8_t>(LedPin::led_ctrl_2), OUTPUT);
+  pinMode(static_cast<uint8_t>(LedPin::led_ctrl_3), OUTPUT);
+  pinMode(static_cast<uint8_t>(LedPin::led_ctrl_4), OUTPUT);
+  pinMode(static_cast<uint8_t>(LedPin::led_ctrl_5), OUTPUT);
+  pinMode(static_cast<uint8_t>(LedPin::led_ctrl_6), OUTPUT);
+  pinMode(static_cast<uint8_t>(LedPin::led_ctrl_7), OUTPUT);
+  
+  pinMode(SDC_CTRL_PIN, OUTPUT);
+
   strip_2.begin();
   strip_3.begin();
   strip_4.begin();

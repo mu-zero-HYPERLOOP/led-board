@@ -18,11 +18,12 @@ static ErrorLevelRangeCheck<EXPECT_UNDER>
                    canzero_set_error_level_mcu_temperature);
 
 int main() {
+  led_board::begin();
+
   canzero_init();
   can_defaults();
   canzero_update_continue(canzero_get_time());
 
-  led_board::begin();
   fsm::begin();
 
   while (true) {

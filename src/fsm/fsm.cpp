@@ -32,6 +32,17 @@ void fsm::update() {
     case led_board_state_STARTUP:
       next_state = states::startup_ease_out(cmd, time_since_last_transition);
       break;
+    case led_board_state_LIFTOFF:
+      break;
+    case led_board_state_BREATHE:
+      next_state = states::breathe_color(cmd, time_since_last_transition);
+      break;
+    case led_board_state_SHUTDOWN:
+      next_state = states::shutdown(cmd, time_since_last_transition);
+      break;
+    case led_board_state_RAINBOW:
+      next_state = states::rainbow_hue(cmd, time_since_last_transition);
+      break;
     }
 
     if (state != next_state) {

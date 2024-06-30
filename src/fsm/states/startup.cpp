@@ -7,7 +7,6 @@
 #include <cstdint>
 #include "util/blends.hpp"
 
-static constexpr uint32_t COLOR = 0x0000ff;
 static constexpr uint16_t num_pixels = led_board::STRIP_2_NUM_PIXELS;
 static constexpr float width = 0.2f;
 static constexpr Duration animation_time = 5_s;
@@ -25,6 +24,9 @@ led_board_state fsm::states::startup_ease_out(
     return led_board_state_STARTUP;
   }
   float t = std::clamp((time_since_last_transition.as_ms() - initial_delay.as_ms()) /(float) animation_time.as_ms(), 0.0f, 1.0f);
+  if (t == 1.0f) {
+    return led_board_state_BREATHE;
+  }
   t = ease_out_quint(t);
   for (int i = 0; i < num_pixels; ++i) {
     float x = i /(float) num_pixels; // x in [0,1)

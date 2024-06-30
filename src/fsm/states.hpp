@@ -13,4 +13,10 @@ led_board_state rainbow_hue(led_board_command cmd, Duration time_since_last_tran
 
 led_board_state liftoff(led_board_command cmd, Duration time_since_last_transition);
 
+led_board_state breathe_brightness(led_board_command cmd, Duration time_since_last_transition);
+
+led_board_state breathe_color(led_board_command cmd, Duration time_since_last_transition);
+
+led_board_state shutdown(led_board_command cmd, Duration time_since_last_transition);
+
 }

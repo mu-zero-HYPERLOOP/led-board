@@ -59,4 +59,5 @@ led_board_state fsm::states::liftoff(
   led_board::strip_2.show();
   led_board::strip_3.show();
 
+  return led_board_state_STARTUP;
 }

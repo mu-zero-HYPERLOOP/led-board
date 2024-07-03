@@ -10,7 +10,7 @@
 static constexpr uint16_t num_pixels = led_board::STRIP_2_NUM_PIXELS;
 static constexpr float width = 0.2f;
 static constexpr Duration animation_time = 5_s;
-static constexpr Duration initial_delay = 5_s;
+static constexpr Duration initial_delay = 1_s;
 
 
 led_board_state fsm::states::startup_ease_out(

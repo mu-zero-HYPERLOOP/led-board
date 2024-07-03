@@ -35,6 +35,47 @@ typedef enum {
   led_board_command_NONE = 0,
   led_board_command_DO_SHIT = 1,
 } led_board_command;
+typedef enum {
+  global_state_INIT = 0,
+  global_state_IDLE = 1,
+  global_state_ARMING45 = 2,
+  global_state_PRECHARGE = 3,
+  global_state_DISARMING45 = 4,
+  global_state_READY = 5,
+  global_state_START_LEVITATION = 6,
+  global_state_LEVITATION_STABLE = 7,
+  global_state_START_GUIDANCE = 8,
+  global_state_GUIDANCE_STABLE = 9,
+  global_state_ACCELERATION = 10,
+  global_state_CONTROLLER = 11,
+  global_state_CRUISING = 12,
+  global_state_DECELERATION = 13,
+  global_state_STOP_LEVITATION = 14,
+  global_state_STOP_GUIDANCE = 15,
+  global_state_SHUTDOWN = 16,
+  global_state_RESTARTING = 17,
+  global_state_CALIBRATING = 18,
+} global_state;
+typedef enum {
+  global_command_NONE = 0,
+  global_command_START_45 = 1,
+  global_command_STOP_45 = 2,
+  global_command_START_LEVITATION = 3,
+  global_command_STOP_LEVITATION = 4,
+  global_command_START_PROPULSION = 5,
+  global_command_STOP_PROPULSION = 6,
+  global_command_START_CONTROLLER = 7,
+  global_command_STOP_CONTROLLER = 8,
+  global_command_ABORT = 9,
+  global_command_EMERGENCY = 10,
+  global_command_SHUTDOWN = 11,
+  global_command_RESTART = 12,
+  global_command_CALIBRATE = 13,
+} global_command;
+typedef enum {
+  sdc_status_OPEN = 0,
+  sdc_status_CLOSED = 1,
+} sdc_status;
 typedef struct {
   uint8_t m_sof;
   uint8_t m_eof;
@@ -61,10 +102,6 @@ typedef enum {
   led_board_state_RAINBOW = 4,
   led_board_state_SHUTDOWN = 5,
 } led_board_state;
-typedef enum {
-  sdc_status_OPEN = 0,
-  sdc_status_CLOSED = 1,
-} sdc_status;
 typedef enum {
   error_flag_OK = 0,
   error_flag_ERROR = 1,
@@ -166,59 +203,74 @@ static inline error_level_config canzero_get_error_level_config_mcu_temperature(
   extern error_level_config __oe_error_level_config_mcu_temperature;
   return __oe_error_level_config_mcu_temperature;
 }
+static inline global_state canzero_get_global_state() {
+  extern global_state __oe_global_state;
+  return __oe_global_state;
+}
+static inline global_command canzero_get_global_command() {
+  extern global_command __oe_global_command;
+  return __oe_global_command;
+}
 typedef struct {
   get_resp_header m_header;
   uint32_t m_data;
 } canzero_message_get_resp;
-static const uint32_t canzero_message_get_resp_id = 0x11D;
+static const uint32_t canzero_message_get_resp_id = 0x15D;
 typedef struct {
   set_resp_header m_header;
 } canzero_message_set_resp;
-static const uint32_t canzero_message_set_resp_id = 0x13D;
+static const uint32_t canzero_message_set_resp_id = 0x17D;
 typedef struct {
   led_board_state m_state;
   sdc_status m_sdc_status;
 } canzero_message_led_board_stream_state;
-static const uint32_t canzero_message_led_board_stream_state_id = 0x92;
+static const uint32_t canzero_message_led_board_stream_state_id = 0xD5;
+typedef struct {
+  uint64_t m_config_hash;
+} canzero_message_led_board_stream_config_hash;
+static const uint32_t canzero_message_led_board_stream_config_hash_id = 0x95;
 typedef struct {
   error_flag m_assertion_fault;
   error_flag m_error_heartbeat_miss;
   error_level m_error_level_mcu_temperature;
 } canzero_message_led_board_stream_errors;
-static const uint32_t canzero_message_led_board_stream_errors_id = 0x72;
+static const uint32_t canzero_message_led_board_stream_errors_id = 0xB5;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can0;
-static const uint32_t canzero_message_heartbeat_can0_id = 0x14F;
+static const uint32_t canzero_message_heartbeat_can0_id = 0x192;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can1;
-static const uint32_t canzero_message_heartbeat_can1_id = 0x14E;
+static const uint32_t canzero_message_heartbeat_can1_id = 0x191;
 typedef struct {
   get_req_header m_header;
 } canzero_message_get_req;
-static const uint32_t canzero_message_get_req_id = 0x11E;
+static const uint32_t canzero_message_get_req_id = 0x15E;
 typedef struct {
   set_req_header m_header;
   uint32_t m_data;
 } canzero_message_set_req;
-static const uint32_t canzero_message_set_req_id = 0x13E;
+static const uint32_t canzero_message_set_req_id = 0x17E;
 typedef struct {
   led_board_command m_led_board_command;
 } canzero_message_mother_board_stream_led_board_command;
-static const uint32_t canzero_message_mother_board_stream_led_board_command_id = 0x4A;
+static const uint32_t canzero_message_mother_board_stream_led_board_command_id = 0x4D;
+typedef struct {
+  global_state m_state;
+  global_command m_command;
+  sdc_status m_system_sdc_status;
+} canzero_message_mother_board_stream_state;
+static const uint32_t canzero_message_mother_board_stream_state_id = 0x6D;
 void canzero_can0_poll();
 void canzero_can1_poll();
 uint32_t canzero_update_continue(uint32_t delta_time);
 void canzero_init();
-static inline void canzero_set_config_hash(uint64_t value){
-  extern uint64_t __oe_config_hash;
-  __oe_config_hash = value;
-}
+void canzero_set_config_hash(uint64_t value);
 
 static inline void canzero_set_build_time(date_time value){
   extern date_time __oe_build_time;
@@ -261,6 +313,16 @@ static inline void canzero_set_error_level_config_mcu_temperature(error_level_co
   __oe_error_level_config_mcu_temperature = value;
 }
 
+static inline void canzero_set_global_state(global_state value){
+  extern global_state __oe_global_state;
+  __oe_global_state = value;
+}
+
+static inline void canzero_set_global_command(global_command value){
+  extern global_command __oe_global_command;
+  __oe_global_command = value;
+}
+
 void canzero_send_config_hash();
 
 void canzero_send_build_time();
@@ -282,5 +344,9 @@ void canzero_send_loop_frequency();
 void canzero_send_mcu_temperature();
 
 void canzero_send_error_level_config_mcu_temperature();
+
+void canzero_send_global_state();
+
+void canzero_send_global_command();
 
 #endif

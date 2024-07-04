@@ -25,7 +25,18 @@ static constexpr uint16_t STRIP_6_NUM_PIXELS = 4;
 static constexpr uint16_t STRIP_7_NUM_PIXELS = 100;
 static constexpr uint8_t DISPLAY_ADDR = 0x27;
 static constexpr uint8_t DISPLAY_NUM_COLUMNS = 20;
+
+static constexpr uint16_t IDX_ANY_ERROR = 0;
+static constexpr uint16_t IDX_BATTERY_UNDERVOLT = 0;
+static constexpr uint16_t IDX_TEMPERATURE_SYSTEM = 0;
+static constexpr uint16_t IDX_SDC_STATUS = 0;
+
 static constexpr uint8_t DISPLAY_NUM_ROWS = 4;
+static constexpr uint32_t COLOR_OK = 0x00ff00;
+static constexpr uint32_t COLOR_ERROR = 0xff0000;
+
+static constexpr uint32_t COLOR_SDC_OPEN = 0x000000;
+static constexpr uint32_t COLOR_SDC_CLOSED = 0xffea00;
 
 static constexpr uint32_t COLOR_MUZERO = 0x00ffb0;
 

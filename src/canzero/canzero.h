@@ -76,6 +76,16 @@ typedef enum {
   sdc_status_OPEN = 0,
   sdc_status_CLOSED = 1,
 } sdc_status;
+typedef enum {
+  error_flag_OK = 0,
+  error_flag_ERROR = 1,
+} error_flag;
+typedef enum {
+  error_level_OK = 0,
+  error_level_INFO = 1,
+  error_level_WARNING = 2,
+  error_level_ERROR = 3,
+} error_level;
 typedef struct {
   uint8_t m_sof;
   uint8_t m_eof;
@@ -102,16 +112,6 @@ typedef enum {
   led_board_state_RAINBOW = 4,
   led_board_state_SHUTDOWN = 5,
 } led_board_state;
-typedef enum {
-  error_flag_OK = 0,
-  error_flag_ERROR = 1,
-} error_flag;
-typedef enum {
-  error_level_OK = 0,
-  error_level_INFO = 1,
-  error_level_WARNING = 2,
-  error_level_ERROR = 3,
-} error_level;
 typedef struct {
   uint16_t m_year;
   uint8_t m_month;
@@ -211,61 +211,123 @@ static inline global_command canzero_get_global_command() {
   extern global_command __oe_global_command;
   return __oe_global_command;
 }
+static inline error_flag canzero_get_mother_board_error_any() {
+  extern error_flag __oe_mother_board_error_any;
+  return __oe_mother_board_error_any;
+}
+static inline error_level canzero_get_mother_board_error_level_over_temperature_system() {
+  extern error_level __oe_mother_board_error_level_over_temperature_system;
+  return __oe_mother_board_error_level_over_temperature_system;
+}
+static inline sdc_status canzero_get_mother_board_system_sdc_status() {
+  extern sdc_status __oe_mother_board_system_sdc_status;
+  return __oe_mother_board_system_sdc_status;
+}
+static inline error_level canzero_get_input_board_error_level_bat24_under_voltage() {
+  extern error_level __oe_input_board_error_level_bat24_under_voltage;
+  return __oe_input_board_error_level_bat24_under_voltage;
+}
 typedef struct {
   get_resp_header m_header;
   uint32_t m_data;
 } canzero_message_get_resp;
-static const uint32_t canzero_message_get_resp_id = 0x15D;
+static const uint32_t canzero_message_get_resp_id = 0x19D;
 typedef struct {
   set_resp_header m_header;
 } canzero_message_set_resp;
-static const uint32_t canzero_message_set_resp_id = 0x17D;
+static const uint32_t canzero_message_set_resp_id = 0x1BD;
 typedef struct {
   led_board_state m_state;
   sdc_status m_sdc_status;
 } canzero_message_led_board_stream_state;
-static const uint32_t canzero_message_led_board_stream_state_id = 0xD5;
+static const uint32_t canzero_message_led_board_stream_state_id = 0x76;
 typedef struct {
   uint64_t m_config_hash;
 } canzero_message_led_board_stream_config_hash;
-static const uint32_t canzero_message_led_board_stream_config_hash_id = 0x95;
+static const uint32_t canzero_message_led_board_stream_config_hash_id = 0x177;
 typedef struct {
   error_flag m_assertion_fault;
   error_flag m_error_heartbeat_miss;
   error_level m_error_level_mcu_temperature;
 } canzero_message_led_board_stream_errors;
-static const uint32_t canzero_message_led_board_stream_errors_id = 0xB5;
+static const uint32_t canzero_message_led_board_stream_errors_id = 0x56;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can0;
-static const uint32_t canzero_message_heartbeat_can0_id = 0x192;
+static const uint32_t canzero_message_heartbeat_can0_id = 0x1D4;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can1;
-static const uint32_t canzero_message_heartbeat_can1_id = 0x191;
+static const uint32_t canzero_message_heartbeat_can1_id = 0x1D3;
 typedef struct {
   get_req_header m_header;
 } canzero_message_get_req;
-static const uint32_t canzero_message_get_req_id = 0x15E;
+static const uint32_t canzero_message_get_req_id = 0x19E;
 typedef struct {
   set_req_header m_header;
   uint32_t m_data;
 } canzero_message_set_req;
-static const uint32_t canzero_message_set_req_id = 0x17E;
+static const uint32_t canzero_message_set_req_id = 0x1BE;
 typedef struct {
   led_board_command m_led_board_command;
 } canzero_message_mother_board_stream_led_board_command;
-static const uint32_t canzero_message_mother_board_stream_led_board_command_id = 0x4D;
+static const uint32_t canzero_message_mother_board_stream_led_board_command_id = 0x70;
 typedef struct {
   global_state m_state;
   global_command m_command;
   sdc_status m_system_sdc_status;
 } canzero_message_mother_board_stream_state;
-static const uint32_t canzero_message_mother_board_stream_state_id = 0x6D;
+static const uint32_t canzero_message_mother_board_stream_state_id = 0x90;
+typedef struct {
+  error_flag m_error_heartbeat_miss;
+  error_flag m_error_any;
+  error_level m_error_level_over_temperature_system;
+} canzero_message_mother_board_stream_errors;
+static const uint32_t canzero_message_mother_board_stream_errors_id = 0x50;
+typedef struct {
+  error_flag m_error_assertion_fault;
+  error_flag m_error_acceleration_out_of_range;
+  error_flag m_error_lateral_acceleration_out_of_range;
+  error_flag m_error_vertical_acceleration_out_of_range;
+  error_flag m_error_acceleration_calibration_failed;
+  error_flag m_error_bat24_voltage_invalid;
+  error_flag m_error_bat24_current_invalid;
+  error_flag m_error_supercap_voltage_invalid;
+  error_flag m_error_link24_current_invalid;
+  error_flag m_error_link45_voltage_invalid;
+  error_flag m_error_link45_current_invalid;
+  error_flag m_error_cooling_cycle_pressure_invalid;
+  error_flag m_error_mcu_temperature_invalid;
+  error_flag m_error_cooling_cycle_temperature_invalid;
+  error_flag m_error_bat24_temperature_invalid;
+  error_flag m_error_supercap_temperature_invalid;
+  error_flag m_error_buck_temperature_invalid;
+  error_flag m_error_ebox_temperature_invalid;
+  error_flag m_error_ambient_temperature_invalid;
+  error_flag m_error_heartbeat_miss;
+  error_level m_error_level_bat24_under_voltage;
+  error_level m_error_level_bat24_over_voltage;
+  error_level m_error_level_bat24_over_current;
+  error_level m_error_level_supercap_under_voltage;
+  error_level m_error_level_supercap_over_voltage;
+  error_level m_error_level_link24_over_current;
+  error_level m_error_level_link45_under_voltage;
+  error_level m_error_level_link45_over_voltage;
+  error_level m_error_level_link45_over_current;
+  error_level m_error_level_cooling_cycle_over_pressure;
+  error_level m_error_level_mcu_temperature;
+  error_level m_error_level_cooling_cycle_temperature;
+  error_level m_error_level_bat24_temperature;
+  error_level m_error_level_supercap_temperature;
+  error_level m_error_level_buck_temperature;
+  error_level m_error_level_ebox_temperature;
+  error_level m_error_level_ambient_temperature;
+} canzero_message_input_board_stream_errors;
+static const uint32_t canzero_message_input_board_stream_errors_id = 0x52;
 void canzero_can0_poll();
 void canzero_can1_poll();
 uint32_t canzero_update_continue(uint32_t delta_time);
@@ -323,6 +385,26 @@ static inline void canzero_set_global_command(global_command value){
   __oe_global_command = value;
 }
 
+static inline void canzero_set_mother_board_error_any(error_flag value){
+  extern error_flag __oe_mother_board_error_any;
+  __oe_mother_board_error_any = value;
+}
+
+static inline void canzero_set_mother_board_error_level_over_temperature_system(error_level value){
+  extern error_level __oe_mother_board_error_level_over_temperature_system;
+  __oe_mother_board_error_level_over_temperature_system = value;
+}
+
+static inline void canzero_set_mother_board_system_sdc_status(sdc_status value){
+  extern sdc_status __oe_mother_board_system_sdc_status;
+  __oe_mother_board_system_sdc_status = value;
+}
+
+static inline void canzero_set_input_board_error_level_bat24_under_voltage(error_level value){
+  extern error_level __oe_input_board_error_level_bat24_under_voltage;
+  __oe_input_board_error_level_bat24_under_voltage = value;
+}
+
 void canzero_send_config_hash();
 
 void canzero_send_build_time();
@@ -348,5 +430,13 @@ void canzero_send_error_level_config_mcu_temperature();
 void canzero_send_global_state();
 
 void canzero_send_global_command();
+
+void canzero_send_mother_board_error_any();
+
+void canzero_send_mother_board_error_level_over_temperature_system();
+
+void canzero_send_mother_board_system_sdc_status();
+
+void canzero_send_input_board_error_level_bat24_under_voltage();
 
 #endif

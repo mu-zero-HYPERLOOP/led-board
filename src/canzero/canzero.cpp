@@ -25,12 +25,16 @@ float DMAMEM __oe_mcu_temperature;
 error_level_config DMAMEM __oe_error_level_config_mcu_temperature;
 global_state DMAMEM __oe_global_state;
 global_command DMAMEM __oe_global_command;
+error_flag DMAMEM __oe_mother_board_error_any;
+error_level DMAMEM __oe_mother_board_error_level_over_temperature_system;
+sdc_status DMAMEM __oe_mother_board_system_sdc_status;
+error_level DMAMEM __oe_input_board_error_level_bat24_under_voltage;
 static void canzero_serialize_canzero_message_get_resp(canzero_message_get_resp* msg, canzero_frame* frame) {
   uint8_t* data = frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x15D;
+  frame->id = 0x19D;
   frame->dlc = 8;
   ((uint32_t*)data)[0] = (uint8_t)(msg->m_header.m_sof & (0xFF >> (8 - 1)));
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_eof & (0xFF >> (8 - 1))) << 1;
@@ -45,7 +49,7 @@ static void canzero_serialize_canzero_message_set_resp(canzero_message_set_resp*
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x17D;
+  frame->id = 0x1BD;
   frame->dlc = 4;
   ((uint32_t*)data)[0] = (uint16_t)(msg->m_header.m_od_index & (0xFFFF >> (16 - 13)));
   ((uint32_t*)data)[0] |= msg->m_header.m_client_id << 13;
@@ -57,7 +61,7 @@ static void canzero_serialize_canzero_message_led_board_stream_state(canzero_mes
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0xD5;
+  frame->id = 0x76;
   frame->dlc = 1;
   ((uint32_t*)data)[0] = (uint8_t)(msg->m_state & (0xFF >> (8 - 3)));
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_sdc_status & (0xFF >> (8 - 1))) << 3;
@@ -67,7 +71,7 @@ static void canzero_serialize_canzero_message_led_board_stream_config_hash(canze
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x95;
+  frame->id = 0x177;
   frame->dlc = 8;
   ((uint64_t*)data)[0] = msg->m_config_hash;
 }
@@ -76,7 +80,7 @@ static void canzero_serialize_canzero_message_led_board_stream_errors(canzero_me
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0xB5;
+  frame->id = 0x56;
   frame->dlc = 1;
   ((uint32_t*)data)[0] = (uint8_t)(msg->m_assertion_fault & (0xFF >> (8 - 1)));
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_error_heartbeat_miss & (0xFF >> (8 - 1))) << 1;
@@ -87,7 +91,7 @@ static void canzero_serialize_canzero_message_heartbeat_can0(canzero_message_hea
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x192;
+  frame->id = 0x1D4;
   frame->dlc = 2;
   ((uint32_t*)data)[0] = msg->m_node_id;
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
@@ -98,7 +102,7 @@ static void canzero_serialize_canzero_message_heartbeat_can1(canzero_message_hea
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x191;
+  frame->id = 0x1D3;
   frame->dlc = 2;
   ((uint32_t*)data)[0] = msg->m_node_id;
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
@@ -129,6 +133,52 @@ static void canzero_deserialize_canzero_message_mother_board_stream_state(canzer
   msg->m_state = (global_state)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 5)));
   msg->m_command = (global_command)((((uint32_t*)data)[0] >> 5) & (0xFFFFFFFF >> (32 - 4)));
   msg->m_system_sdc_status = (sdc_status)((((uint32_t*)data)[0] >> 9) & (0xFFFFFFFF >> (32 - 1)));
+}
+static void canzero_deserialize_canzero_message_mother_board_stream_errors(canzero_frame* frame, canzero_message_mother_board_stream_errors* msg) {
+  uint8_t* data = frame->data;
+  msg->m_error_heartbeat_miss = (error_flag)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_any = (error_flag)((((uint32_t*)data)[0] >> 1) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_level_over_temperature_system = (error_level)((((uint32_t*)data)[0] >> 2) & (0xFFFFFFFF >> (32 - 2)));
+}
+static void canzero_deserialize_canzero_message_input_board_stream_errors(canzero_frame* frame, canzero_message_input_board_stream_errors* msg) {
+  uint8_t* data = frame->data;
+  msg->m_error_assertion_fault = (error_flag)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_acceleration_out_of_range = (error_flag)((((uint32_t*)data)[0] >> 1) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_lateral_acceleration_out_of_range = (error_flag)((((uint32_t*)data)[0] >> 2) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_vertical_acceleration_out_of_range = (error_flag)((((uint32_t*)data)[0] >> 3) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_acceleration_calibration_failed = (error_flag)((((uint32_t*)data)[0] >> 4) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_bat24_voltage_invalid = (error_flag)((((uint32_t*)data)[0] >> 5) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_bat24_current_invalid = (error_flag)((((uint32_t*)data)[0] >> 6) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_supercap_voltage_invalid = (error_flag)((((uint32_t*)data)[0] >> 7) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_link24_current_invalid = (error_flag)((((uint32_t*)data)[0] >> 8) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_link45_voltage_invalid = (error_flag)((((uint32_t*)data)[0] >> 9) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_link45_current_invalid = (error_flag)((((uint32_t*)data)[0] >> 10) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_cooling_cycle_pressure_invalid = (error_flag)((((uint32_t*)data)[0] >> 11) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_mcu_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 12) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_cooling_cycle_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 13) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_bat24_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 14) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_supercap_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 15) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_buck_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 16) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_ebox_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 17) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_ambient_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 18) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_heartbeat_miss = (error_flag)((((uint32_t*)data)[0] >> 19) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_level_bat24_under_voltage = (error_level)((((uint32_t*)data)[0] >> 20) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_bat24_over_voltage = (error_level)((((uint32_t*)data)[0] >> 22) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_bat24_over_current = (error_level)((((uint32_t*)data)[0] >> 24) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_supercap_under_voltage = (error_level)((((uint32_t*)data)[0] >> 26) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_supercap_over_voltage = (error_level)((((uint32_t*)data)[0] >> 28) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_link24_over_current = (error_level)((((uint32_t*)data)[0] >> 30) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_link45_under_voltage = (error_level)(((uint32_t*)data)[1] & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_link45_over_voltage = (error_level)((((uint32_t*)data)[1] >> 2) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_link45_over_current = (error_level)((((uint32_t*)data)[1] >> 4) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_cooling_cycle_over_pressure = (error_level)((((uint32_t*)data)[1] >> 6) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_mcu_temperature = (error_level)((((uint32_t*)data)[1] >> 8) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_cooling_cycle_temperature = (error_level)((((uint32_t*)data)[1] >> 10) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_bat24_temperature = (error_level)((((uint32_t*)data)[1] >> 12) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_supercap_temperature = (error_level)((((uint32_t*)data)[1] >> 14) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_buck_temperature = (error_level)((((uint32_t*)data)[1] >> 16) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_ebox_temperature = (error_level)((((uint32_t*)data)[1] >> 18) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_ambient_temperature = (error_level)((((uint32_t*)data)[1] >> 20) & (0xFFFFFFFF >> (32 - 2)));
 }
 static void canzero_deserialize_canzero_message_heartbeat_can0(canzero_frame* frame, canzero_message_heartbeat_can0* msg) {
   uint8_t* data = frame->data;
@@ -431,7 +481,7 @@ static void schedule_jobs(uint32_t time) {
         stream_message.m_error_level_mcu_temperature = __oe_error_level_mcu_temperature;
         canzero_frame stream_frame;
         canzero_serialize_canzero_message_led_board_stream_errors(&stream_message, &stream_frame);
-        canzero_can1_send(&stream_frame);
+        canzero_can0_send(&stream_frame);
         break;
       }
         default:
@@ -660,6 +710,34 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     resp.m_header.m_toggle = 0;
     break;
   }
+  case 13: {
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_any) & (0xFF >> (8 - 1)))) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
+  case 14: {
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_level_over_temperature_system) & (0xFF >> (8 - 2)))) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
+  case 15: {
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
+  case 16: {
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_input_board_error_level_bat24_under_voltage) & (0xFF >> (8 - 2)))) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
   }
   resp.m_header.m_od_index = msg.m_header.m_od_index;
   resp.m_header.m_client_id = msg.m_header.m_client_id;
@@ -862,6 +940,42 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_global_command(global_command_tmp);
     break;
   }
+  case 13 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
+    error_flag mother_board_error_any_tmp;
+    mother_board_error_any_tmp = ((error_flag)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
+    canzero_set_mother_board_error_any(mother_board_error_any_tmp);
+    break;
+  }
+  case 14 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
+    error_level mother_board_error_level_over_temperature_system_tmp;
+    mother_board_error_level_over_temperature_system_tmp = ((error_level)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
+    canzero_set_mother_board_error_level_over_temperature_system(mother_board_error_level_over_temperature_system_tmp);
+    break;
+  }
+  case 15 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
+    sdc_status mother_board_system_sdc_status_tmp;
+    mother_board_system_sdc_status_tmp = ((sdc_status)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
+    canzero_set_mother_board_system_sdc_status(mother_board_system_sdc_status_tmp);
+    break;
+  }
+  case 16 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
+    error_level input_board_error_level_bat24_under_voltage_tmp;
+    input_board_error_level_bat24_under_voltage_tmp = ((error_level)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
+    canzero_set_input_board_error_level_bat24_under_voltage(input_board_error_level_bat24_under_voltage_tmp);
+    break;
+  }
   default:
     return;
   }
@@ -884,6 +998,16 @@ static void canzero_handle_mother_board_stream_state(canzero_frame* frame) {
   canzero_deserialize_canzero_message_mother_board_stream_state(frame, &msg);
   canzero_set_global_state(msg.m_state);
   canzero_set_global_command(msg.m_command);
+  canzero_set_mother_board_system_sdc_status(msg.m_system_sdc_status);
+}
+static void canzero_handle_mother_board_stream_errors(canzero_frame* frame) {
+  canzero_message_mother_board_stream_errors msg;
+  canzero_deserialize_canzero_message_mother_board_stream_errors(frame, &msg);
+  canzero_set_mother_board_error_any(msg.m_error_any);
+}
+static void canzero_handle_input_board_stream_errors(canzero_frame* frame) {
+  canzero_message_input_board_stream_errors msg;
+  canzero_deserialize_canzero_message_input_board_stream_errors(frame, &msg);
 }
  void canzero_handle_heartbeat_can0(canzero_frame* frame) {
   canzero_message_heartbeat_can0 msg;
@@ -951,16 +1075,16 @@ void canzero_can0_poll() {
   canzero_frame frame;
   while (canzero_can0_recv(&frame)) {
     switch (frame.id) {
-      case 0x15E:
+      case 0x19E:
         canzero_handle_get_req(&frame);
         break;
-      case 0x4D:
+      case 0x70:
         canzero_handle_mother_board_stream_led_board_command(&frame);
         break;
-      case 0x6D:
+      case 0x90:
         canzero_handle_mother_board_stream_state(&frame);
         break;
-      case 0x192:
+      case 0x1D4:
         canzero_handle_heartbeat_can0(&frame);
         break;
     }
@@ -970,10 +1094,16 @@ void canzero_can1_poll() {
   canzero_frame frame;
   while (canzero_can1_recv(&frame)) {
     switch (frame.id) {
-      case 0x17E:
+      case 0x1BE:
         canzero_handle_set_req(&frame);
         break;
-      case 0x191:
+      case 0x50:
+        canzero_handle_mother_board_stream_errors(&frame);
+        break;
+      case 0x52:
+        canzero_handle_input_board_stream_errors(&frame);
+        break;
+      case 0x1D3:
         canzero_handle_heartbeat_can1(&frame);
         break;
     }
@@ -1034,7 +1164,7 @@ uint32_t canzero_update_continue(uint32_t time){
 #define BUILD_MIN   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_MIN)
 #define BUILD_SEC   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_SEC)
 void canzero_init() {
-  __oe_config_hash = 285820640272123834ull;
+  __oe_config_hash = 11735695416577481027ull;
   __oe_build_time = {
     .m_year = BUILD_YEAR,
     .m_month = BUILD_MONTH,
@@ -1297,6 +1427,58 @@ void canzero_send_global_command() {
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
   msg.m_header.m_od_index = 12;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_led_board;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can0_send(&sender_frame);
+}
+void canzero_send_mother_board_error_any() {
+  canzero_message_get_resp msg;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_any) & (0xFF >> (8 - 1)))) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 13;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_led_board;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can0_send(&sender_frame);
+}
+void canzero_send_mother_board_error_level_over_temperature_system() {
+  canzero_message_get_resp msg;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_level_over_temperature_system) & (0xFF >> (8 - 2)))) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 14;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_led_board;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can0_send(&sender_frame);
+}
+void canzero_send_mother_board_system_sdc_status() {
+  canzero_message_get_resp msg;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 15;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_led_board;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can0_send(&sender_frame);
+}
+void canzero_send_input_board_error_level_bat24_under_voltage() {
+  canzero_message_get_resp msg;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_input_board_error_level_bat24_under_voltage) & (0xFF >> (8 - 2)))) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 16;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;

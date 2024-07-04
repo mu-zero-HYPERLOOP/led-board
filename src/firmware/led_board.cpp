@@ -5,6 +5,7 @@
 #include "canzero/canzero.h"
 #include "core_pins.h"
 #include "pinout.h"
+#include "util/blends.hpp"
 #include "util/metrics.h"
 #include <InternalTemperature.h>
 #include <string>
@@ -18,8 +19,6 @@ Adafruit_NeoPixel led_board::strip_6 = Adafruit_NeoPixel(STRIP_6_NUM_PIXELS, (in
 Adafruit_NeoPixel led_board::strip_7 = Adafruit_NeoPixel(STRIP_7_NUM_PIXELS, (int16_t)LedPin::led_ctrl_7, NEO_BRG + NEO_KHZ800);
 
 LiquidCrystal_PCF8574 led_board::display = LiquidCrystal_PCF8574(led_board::DISPLAY_ADDR);
-
-bool bla = true;
 
 void led_board::begin() {
   pinMode(static_cast<uint8_t>(LedPin::led_ctrl_2), OUTPUT);
@@ -145,7 +144,34 @@ const char* global_command_to_str(global_command cmd) {
   }
 }
 
+uint32_t error_level_to_color(error_level lvl) {
+  switch (lvl) {
+  case error_level_OK:
+    return led_board::COLOR_OK;
+  case error_level_INFO:
+      return linear_interpolate(led_board::COLOR_OK, led_board::COLOR_ERROR, 0.2f);
+  case error_level_WARNING:
+      return linear_interpolate(led_board::COLOR_OK, led_board::COLOR_ERROR, 0.6f);
+  case error_level_ERROR:
+    return led_board::COLOR_ERROR;
+  default:
+    return 0;
+  }
+}
+
+uint32_t error_flag_to_color(error_flag flag) {
+  switch (flag) {
+  case error_flag_OK:
+    return led_board::COLOR_OK;
+  case error_flag_ERROR:
+    return led_board::COLOR_ERROR;
+  default:
+    return 0;
+  }
+}
+
 void led_board::update() {
+  // === update display ===
   display.setCursor(0, 0);
   display.printf("State:");
   display.setCursor(1, 1);
@@ -154,6 +180,19 @@ void led_board::update() {
   display.printf("Command:");
   display.setCursor(1, 3);
   display.printf("~%s", global_command_to_str(canzero_get_global_command()));
+
+  // === update status LEDs ===
+  led_board::strip_6.setPixelColor(IDX_ANY_ERROR, 
+      error_flag_to_color(canzero_get_mother_board_error_any()));
+  led_board::strip_6.setPixelColor(IDX_BATTERY_UNDERVOLT,
+      error_level_to_color(canzero_get_input_board_error_level_bat24_under_voltage()));
+  led_board::strip_6.setPixelColor(IDX_TEMPERATURE_SYSTEM,
+      error_level_to_color(canzero_get_mother_board_error_level_over_temperature_system()));
+  led_board::strip_6.setPixelColor(IDX_SDC_STATUS,
+      canzero_get_mother_board_system_sdc_status() == sdc_status_CLOSED ?
+      led_board::COLOR_SDC_OPEN : led_board::COLOR_SDC_CLOSED);
+
+
 }
 
 void led_board::set_sdc(bool close) {

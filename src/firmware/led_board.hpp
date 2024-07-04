@@ -27,9 +27,9 @@ static constexpr uint8_t DISPLAY_ADDR = 0x27;
 static constexpr uint8_t DISPLAY_NUM_COLUMNS = 20;
 
 static constexpr uint16_t IDX_ANY_ERROR = 0;
-static constexpr uint16_t IDX_BATTERY_UNDERVOLT = 0;
-static constexpr uint16_t IDX_TEMPERATURE_SYSTEM = 0;
-static constexpr uint16_t IDX_SDC_STATUS = 0;
+static constexpr uint16_t IDX_BATTERY_UNDERVOLT = 1;
+static constexpr uint16_t IDX_TEMPERATURE_SYSTEM = 2;
+static constexpr uint16_t IDX_SDC_STATUS = 3;
 
 static constexpr uint8_t DISPLAY_NUM_ROWS = 4;
 static constexpr uint32_t COLOR_OK = 0x00ff00;

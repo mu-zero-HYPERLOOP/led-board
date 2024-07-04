@@ -189,9 +189,9 @@ void led_board::update() {
   led_board::strip_6.setPixelColor(IDX_TEMPERATURE_SYSTEM,
       error_level_to_color(canzero_get_mother_board_error_level_over_temperature_system()));
   led_board::strip_6.setPixelColor(IDX_SDC_STATUS,
-      canzero_get_mother_board_system_sdc_status() == sdc_status_CLOSED ?
+      canzero_get_mother_board_system_sdc_status() == sdc_status_OPEN ?
       led_board::COLOR_SDC_OPEN : led_board::COLOR_SDC_CLOSED);
-
+  led_board::strip_6.show();
 
 }
 

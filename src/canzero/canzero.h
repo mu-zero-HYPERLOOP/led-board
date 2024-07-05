@@ -195,6 +195,10 @@ static inline double canzero_get_loop_frequency() {
   extern double __oe_loop_frequency;
   return __oe_loop_frequency;
 }
+static inline uint8_t canzero_get_last_node_missed() {
+  extern uint8_t __oe_last_node_missed;
+  return __oe_last_node_missed;
+}
 static inline float canzero_get_mcu_temperature() {
   extern float __oe_mcu_temperature;
   return __oe_mcu_temperature;
@@ -249,6 +253,7 @@ typedef struct {
   error_flag m_assertion_fault;
   error_flag m_error_heartbeat_miss;
   error_level m_error_level_mcu_temperature;
+  uint8_t m_last_node_missed;
 } canzero_message_led_board_stream_errors;
 static const uint32_t canzero_message_led_board_stream_errors_id = 0x56;
 typedef struct {
@@ -286,6 +291,7 @@ typedef struct {
   error_flag m_error_heartbeat_miss;
   error_flag m_error_any;
   error_level m_error_level_over_temperature_system;
+  uint8_t m_last_node_missed;
 } canzero_message_mother_board_stream_errors;
 static const uint32_t canzero_message_mother_board_stream_errors_id = 0x50;
 typedef struct {
@@ -326,6 +332,7 @@ typedef struct {
   error_level m_error_level_buck_temperature;
   error_level m_error_level_ebox_temperature;
   error_level m_error_level_ambient_temperature;
+  uint8_t m_last_node_missed;
 } canzero_message_input_board_stream_errors;
 static const uint32_t canzero_message_input_board_stream_errors_id = 0x52;
 void canzero_can0_poll();
@@ -364,6 +371,8 @@ static inline void canzero_set_loop_frequency(double value){
   extern double __oe_loop_frequency;
   __oe_loop_frequency = value;
 }
+
+void canzero_set_last_node_missed(uint8_t value);
 
 static inline void canzero_set_mcu_temperature(float value){
   extern float __oe_mcu_temperature;
@@ -422,6 +431,8 @@ void canzero_send_error_level_mcu_temperature();
 void canzero_send_command();
 
 void canzero_send_loop_frequency();
+
+void canzero_send_last_node_missed();
 
 void canzero_send_mcu_temperature();
 

@@ -35,7 +35,7 @@ static void canzero_serialize_canzero_message_get_resp(canzero_message_get_resp*
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x19D;
+  frame->id = 0x1BD;
   frame->dlc = 8;
   ((uint32_t*)data)[0] = (uint8_t)(msg->m_header.m_sof & (0xFF >> (8 - 1)));
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_eof & (0xFF >> (8 - 1))) << 1;
@@ -50,7 +50,7 @@ static void canzero_serialize_canzero_message_set_resp(canzero_message_set_resp*
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x1BD;
+  frame->id = 0x1DD;
   frame->dlc = 4;
   ((uint32_t*)data)[0] = (uint16_t)(msg->m_header.m_od_index & (0xFFFF >> (16 - 13)));
   ((uint32_t*)data)[0] |= msg->m_header.m_client_id << 13;
@@ -72,7 +72,7 @@ static void canzero_serialize_canzero_message_led_board_stream_config_hash(canze
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x177;
+  frame->id = 0x197;
   frame->dlc = 8;
   ((uint64_t*)data)[0] = msg->m_config_hash;
 }
@@ -93,7 +93,7 @@ static void canzero_serialize_canzero_message_heartbeat_can0(canzero_message_hea
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x1D4;
+  frame->id = 0x1F4;
   frame->dlc = 2;
   ((uint32_t*)data)[0] = msg->m_node_id;
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
@@ -104,7 +104,7 @@ static void canzero_serialize_canzero_message_heartbeat_can1(canzero_message_hea
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x1D3;
+  frame->id = 0x1F3;
   frame->dlc = 2;
   ((uint32_t*)data)[0] = msg->m_node_id;
   ((uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
@@ -145,7 +145,7 @@ static void canzero_deserialize_canzero_message_mother_board_stream_errors(canze
 }
 static void canzero_deserialize_canzero_message_input_board_stream_errors(canzero_frame* frame, canzero_message_input_board_stream_errors* msg) {
   uint8_t* data = frame->data;
-  msg->m_error_assertion_fault = (error_flag)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_assertion_fault = (error_flag)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 1)));
   msg->m_error_acceleration_out_of_range = (error_flag)((((uint32_t*)data)[0] >> 1) & (0xFFFFFFFF >> (32 - 1)));
   msg->m_error_lateral_acceleration_out_of_range = (error_flag)((((uint32_t*)data)[0] >> 2) & (0xFFFFFFFF >> (32 - 1)));
   msg->m_error_vertical_acceleration_out_of_range = (error_flag)((((uint32_t*)data)[0] >> 3) & (0xFFFFFFFF >> (32 - 1)));
@@ -156,33 +156,19 @@ static void canzero_deserialize_canzero_message_input_board_stream_errors(canzer
   msg->m_error_link24_current_invalid = (error_flag)((((uint32_t*)data)[0] >> 8) & (0xFFFFFFFF >> (32 - 1)));
   msg->m_error_link45_voltage_invalid = (error_flag)((((uint32_t*)data)[0] >> 9) & (0xFFFFFFFF >> (32 - 1)));
   msg->m_error_link45_current_invalid = (error_flag)((((uint32_t*)data)[0] >> 10) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_cooling_cycle_pressure_invalid = (error_flag)((((uint32_t*)data)[0] >> 11) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_mcu_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 12) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_cooling_cycle_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 13) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_bat24_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 14) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_supercap_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 15) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_buck_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 16) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_ebox_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 17) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_ambient_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 18) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_heartbeat_miss = (error_flag)((((uint32_t*)data)[0] >> 19) & (0xFFFFFFFF >> (32 - 1)));
-  msg->m_error_level_bat24_under_voltage = (error_level)((((uint32_t*)data)[0] >> 20) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_bat24_over_voltage = (error_level)((((uint32_t*)data)[0] >> 22) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_bat24_over_current = (error_level)((((uint32_t*)data)[0] >> 24) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_supercap_under_voltage = (error_level)((((uint32_t*)data)[0] >> 26) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_supercap_over_voltage = (error_level)((((uint32_t*)data)[0] >> 28) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_link24_over_current = (error_level)((((uint32_t*)data)[0] >> 30) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_link45_under_voltage = (error_level)(((uint32_t*)data)[1] & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_link45_over_voltage = (error_level)((((uint32_t*)data)[1] >> 2) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_link45_over_current = (error_level)((((uint32_t*)data)[1] >> 4) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_cooling_cycle_over_pressure = (error_level)((((uint32_t*)data)[1] >> 6) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_mcu_temperature = (error_level)((((uint32_t*)data)[1] >> 8) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_cooling_cycle_temperature = (error_level)((((uint32_t*)data)[1] >> 10) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_bat24_temperature = (error_level)((((uint32_t*)data)[1] >> 12) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_supercap_temperature = (error_level)((((uint32_t*)data)[1] >> 14) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_buck_temperature = (error_level)((((uint32_t*)data)[1] >> 16) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_ebox_temperature = (error_level)((((uint32_t*)data)[1] >> 18) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_error_level_ambient_temperature = (error_level)((((uint32_t*)data)[1] >> 20) & (0xFFFFFFFF >> (32 - 2)));
-  msg->m_last_node_missed = ((((uint32_t*)data)[1] >> 22) & (0xFFFFFFFF >> (32 - 8)));
+  msg->m_error_mcu_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 11) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_sac_ebox_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 12) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_power_ebox_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 13) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_bat24_cell_temperature_1_invalid = (error_flag)((((uint32_t*)data)[0] >> 14) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_bat24_cell_temperature_2_invalid = (error_flag)((((uint32_t*)data)[0] >> 15) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_supercap_temperature_invalid = (error_flag)((((uint32_t*)data)[0] >> 16) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_ambient_temperature_1_invalid = (error_flag)((((uint32_t*)data)[0] >> 17) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_ambient_temperature_2_invalid = (error_flag)((((uint32_t*)data)[0] >> 18) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_ambient_temperature_3_invalid = (error_flag)((((uint32_t*)data)[0] >> 19) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_heartbeat_miss = (error_flag)((((uint32_t*)data)[0] >> 20) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_error_level_bat24_under_voltage = (error_level)((((uint32_t*)data)[0] >> 21) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_bat24_over_voltage = (error_level)((((uint32_t*)data)[0] >> 23) & (0xFFFFFFFF >> (32 - 2)));
+  msg->m_error_level_bat24_over_current = (error_level)((((uint32_t*)data)[0] >> 25) & (0xFFFFFFFF >> (32 - 2)));
 }
 static void canzero_deserialize_canzero_message_heartbeat_can0(canzero_frame* frame, canzero_message_heartbeat_can0* msg) {
   uint8_t* data = frame->data;
@@ -352,7 +338,7 @@ static void scheduler_unschedule() {
   scheduler.size -= 1;
   scheduler_reschedule(scheduler.heap[0]->climax);
 }
-static const uint32_t get_resp_fragmentation_interval = 10;
+static const uint32_t get_resp_fragmentation_interval = 100;
 static void schedule_get_resp_fragmentation_job(uint32_t *fragmentation_buffer, uint8_t size, uint8_t od_index, uint8_t client_id) {
   job_t *fragmentation_job = job_pool_allocator_alloc();
   fragmentation_job->climax = canzero_get_time() + get_resp_fragmentation_interval;
@@ -1025,10 +1011,12 @@ static void canzero_handle_mother_board_stream_errors(canzero_frame* frame) {
   canzero_message_mother_board_stream_errors msg;
   canzero_deserialize_canzero_message_mother_board_stream_errors(frame, &msg);
   canzero_set_mother_board_error_any(msg.m_error_any);
+  canzero_set_mother_board_error_level_over_temperature_system(msg.m_error_level_over_temperature_system);
 }
 static void canzero_handle_input_board_stream_errors(canzero_frame* frame) {
   canzero_message_input_board_stream_errors msg;
   canzero_deserialize_canzero_message_input_board_stream_errors(frame, &msg);
+  canzero_set_input_board_error_level_bat24_under_voltage(msg.m_error_level_bat24_under_voltage);
 }
  void canzero_handle_heartbeat_can0(canzero_frame* frame) {
   canzero_message_heartbeat_can0 msg;
@@ -1096,7 +1084,7 @@ void canzero_can0_poll() {
   canzero_frame frame;
   while (canzero_can0_recv(&frame)) {
     switch (frame.id) {
-      case 0x19E:
+      case 0x1BE:
         canzero_handle_get_req(&frame);
         break;
       case 0x70:
@@ -1105,7 +1093,7 @@ void canzero_can0_poll() {
       case 0x50:
         canzero_handle_mother_board_stream_errors(&frame);
         break;
-      case 0x1D4:
+      case 0x1F4:
         canzero_handle_heartbeat_can0(&frame);
         break;
     }
@@ -1115,7 +1103,7 @@ void canzero_can1_poll() {
   canzero_frame frame;
   while (canzero_can1_recv(&frame)) {
     switch (frame.id) {
-      case 0x1BE:
+      case 0x1DE:
         canzero_handle_set_req(&frame);
         break;
       case 0x90:
@@ -1124,7 +1112,7 @@ void canzero_can1_poll() {
       case 0x52:
         canzero_handle_input_board_stream_errors(&frame);
         break;
-      case 0x1D3:
+      case 0x1F3:
         canzero_handle_heartbeat_can1(&frame);
         break;
     }
@@ -1185,7 +1173,7 @@ uint32_t canzero_update_continue(uint32_t time){
 #define BUILD_MIN   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_MIN)
 #define BUILD_SEC   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_SEC)
 void canzero_init() {
-  __oe_config_hash = 13292579970420444862ull;
+  __oe_config_hash = 2876945102520670225ull;
   __oe_build_time = {
     .m_year = BUILD_YEAR,
     .m_month = BUILD_MONTH,

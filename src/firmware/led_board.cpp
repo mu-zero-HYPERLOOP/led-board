@@ -10,6 +10,7 @@
 #include <InternalTemperature.h>
 #include <string>
 #include "print.h"
+#include "util/interval.h"
 
 Adafruit_NeoPixel led_board::strip_2 = Adafruit_NeoPixel(STRIP_2_NUM_PIXELS, (int16_t)LedPin::led_ctrl_2, NEO_BRG + NEO_KHZ800);
 Adafruit_NeoPixel led_board::strip_3 = Adafruit_NeoPixel(STRIP_3_NUM_PIXELS, (int16_t)LedPin::led_ctrl_3, NEO_BRG + NEO_KHZ800);
@@ -19,6 +20,7 @@ Adafruit_NeoPixel led_board::strip_6 = Adafruit_NeoPixel(STRIP_6_NUM_PIXELS, (in
 Adafruit_NeoPixel led_board::strip_7 = Adafruit_NeoPixel(STRIP_7_NUM_PIXELS, (int16_t)LedPin::led_ctrl_7, NEO_BRG + NEO_KHZ800);
 
 LiquidCrystal_PCF8574 led_board::display = LiquidCrystal_PCF8574(led_board::DISPLAY_ADDR);
+Interval led_board::display_update_interval = Interval(500_ms);
 
 void led_board::begin() {
   pinMode(static_cast<uint8_t>(LedPin::led_ctrl_2), OUTPUT);
@@ -67,80 +69,80 @@ void led_board::begin() {
 const char* global_state_to_str(global_state state) {
   switch(state) {
   case global_state_INIT:
-    return "Init";
+    return "Init               ";
   case global_state_IDLE:
-    return "Idle";
+    return "Idle               ";
   case global_state_ARMING45:
-    return "Arming 45V";
+    return "Arming 45V         ";
   case global_state_PRECHARGE:
-    return "Precharge";
+    return "Precharge          ";
   case global_state_DISARMING45:
-    return "Disarming";
+    return "Disarming          ";
   case global_state_READY:
-    return "Ready";
+    return "Ready              ";
   case global_state_START_LEVITATION:
     return "Starting Levitation";
   case global_state_LEVITATION_STABLE:
-    return "Levitation Stable";
+    return "Levitation Stable  ";
   case global_state_START_GUIDANCE:
-    return "Starting Guidance";
+    return "Starting Guidance  ";
   case global_state_GUIDANCE_STABLE:
-    return "Guidance Stable";
+    return "Guidance Stable    ";
   case global_state_ACCELERATION:
-    return "Accelerating";
+    return "Accelerating       ";
   case global_state_CONTROLLER:
-    return "Controller";
+    return "Controller         ";
   case global_state_CRUISING:
-    return "Cruising";
+    return "Cruising           ";
   case global_state_DECELERATION:
-    return "Decelerating";
+    return "Decelerating       ";
   case global_state_STOP_LEVITATION:
     return "Stopping Levitation";
   case global_state_STOP_GUIDANCE:
-    return "Stopping Guidance";
+    return "Stopping Guidance  ";
   case global_state_SHUTDOWN:
-    return "Shutdown";
+    return "Shutdown           ";
   case global_state_RESTARTING:
-    return "Restarting";
+    return "Restarting         ";
   case global_state_CALIBRATING:
-    return "Calibrating";
+    return "Calibrating        ";
   default:
-    return "";
+    return "                   ";
   }
 }
 
 const char* global_command_to_str(global_command cmd) {
   switch (cmd) {
   case global_command_NONE:
-    return "None";
+    return "None            ";
   case global_command_START_45:
-    return "Start 45V";
+    return "Start 45V       ";
   case global_command_STOP_45:
-    return "Stop 45V";
+    return "Stop 45V        ";
   case global_command_START_LEVITATION:
     return "Start Levitation";
   case global_command_STOP_LEVITATION:
-    return "Stop Levitation";
+    return "Stop Levitation ";
   case global_command_START_PROPULSION:
     return "Start Propulsion";
   case global_command_STOP_PROPULSION:
-    return "Stop Propulsion";
+    return "Stop Propulsion ";
   case global_command_START_CONTROLLER:
     return "Start Controller";
   case global_command_STOP_CONTROLLER:
-    return "Stop Controller";
+    return "Stop Controller ";
   case global_command_ABORT:
-    return "Abort";
+    return "Abort           ";
   case global_command_EMERGENCY:
-    return "Emergency";
+    return "Emergency       ";
   case global_command_SHUTDOWN:
-    return "Shutdown";
+    return "Shutdown        ";
   case global_command_RESTART:
-    return "Restart";
+    return "Restart         ";
   case global_command_CALIBRATE:
-    return "Calibrate";
+    return "Calibrate       ";
   default:
-    return "";
+    return "                ";
   }
 }
 
@@ -172,14 +174,16 @@ uint32_t error_flag_to_color(error_flag flag) {
 
 void led_board::update() {
   // === update display ===
-  display.setCursor(0, 0);
-  display.printf("State:");
-  display.setCursor(1, 1);
-  display.printf("~%s", global_state_to_str(canzero_get_global_state()));
-  display.setCursor(0, 2);
-  display.printf("Command:");
-  display.setCursor(1, 3);
-  display.printf("~%s", global_command_to_str(canzero_get_global_command()));
+  if (led_board::display_update_interval.next()) {
+    display.setCursor(0, 0);
+    display.printf("State:");
+    display.setCursor(0, 1);
+    display.printf("~%s", global_state_to_str(canzero_get_global_state()));
+    display.setCursor(0, 2);
+    display.printf("Command:");
+    display.setCursor(0, 3);
+    display.printf("~%s", global_command_to_str(canzero_get_global_command()));
+  }
 
   // === update status LEDs ===
   led_board::strip_6.setPixelColor(IDX_ANY_ERROR, 

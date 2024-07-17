@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/interval.h"
 #include "util/metrics.h"
 #include <Adafruit_NeoPixel.h>
 #include <string>
@@ -15,7 +16,9 @@ extern Adafruit_NeoPixel strip_4;
 extern Adafruit_NeoPixel strip_5;
 extern Adafruit_NeoPixel strip_6;
 extern Adafruit_NeoPixel strip_7;
+
 extern LiquidCrystal_PCF8574 display;
+extern Interval display_update_interval;
 
 static constexpr uint16_t STRIP_2_NUM_PIXELS = 42;
 static constexpr uint16_t STRIP_3_NUM_PIXELS = 42;

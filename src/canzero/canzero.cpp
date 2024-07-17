@@ -31,84 +31,84 @@ error_level DMAMEM __oe_mother_board_error_level_over_temperature_system;
 sdc_status DMAMEM __oe_mother_board_system_sdc_status;
 error_level DMAMEM __oe_input_board_error_level_bat24_under_voltage;
 static void canzero_serialize_canzero_message_get_resp(canzero_message_get_resp* msg, canzero_frame* frame) {
-  uint8_t* data = frame->data;
+  volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
   frame->id = 0x1BD;
   frame->dlc = 8;
-  ((uint32_t*)data)[0] = (uint8_t)(msg->m_header.m_sof & (0xFF >> (8 - 1)));
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_eof & (0xFF >> (8 - 1))) << 1;
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_toggle & (0xFF >> (8 - 1))) << 2;
-  ((uint32_t*)data)[0] |= (uint16_t)(msg->m_header.m_od_index & (0xFFFF >> (16 - 13))) << 3;
-  ((uint32_t*)data)[0] |= msg->m_header.m_client_id << 16;
-  ((uint32_t*)data)[0] |= msg->m_header.m_server_id << 24;
-  ((uint32_t*)data)[1] = msg->m_data;
+  ((volatile uint32_t*)data)[0] = (uint8_t)(msg->m_header.m_sof & (0xFF >> (8 - 1)));
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_eof & (0xFF >> (8 - 1))) << 1;
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_toggle & (0xFF >> (8 - 1))) << 2;
+  ((volatile uint32_t*)data)[0] |= (uint16_t)(msg->m_header.m_od_index & (0xFFFF >> (16 - 13))) << 3;
+  ((volatile uint32_t*)data)[0] |= msg->m_header.m_client_id << 16;
+  ((volatile uint32_t*)data)[0] |= msg->m_header.m_server_id << 24;
+  ((volatile uint32_t*)data)[1] = msg->m_data;
 }
 static void canzero_serialize_canzero_message_set_resp(canzero_message_set_resp* msg, canzero_frame* frame) {
-  uint8_t* data = frame->data;
+  volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
   frame->id = 0x1DD;
   frame->dlc = 4;
-  ((uint32_t*)data)[0] = (uint16_t)(msg->m_header.m_od_index & (0xFFFF >> (16 - 13)));
-  ((uint32_t*)data)[0] |= msg->m_header.m_client_id << 13;
-  ((uint32_t*)data)[0] |= msg->m_header.m_server_id << 21;
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_erno & (0xFF >> (8 - 1))) << 29;
+  ((volatile uint32_t*)data)[0] = (uint16_t)(msg->m_header.m_od_index & (0xFFFF >> (16 - 13)));
+  ((volatile uint32_t*)data)[0] |= msg->m_header.m_client_id << 13;
+  ((volatile uint32_t*)data)[0] |= msg->m_header.m_server_id << 21;
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_erno & (0xFF >> (8 - 1))) << 29;
 }
 static void canzero_serialize_canzero_message_led_board_stream_state(canzero_message_led_board_stream_state* msg, canzero_frame* frame) {
-  uint8_t* data = frame->data;
+  volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
   frame->id = 0x76;
   frame->dlc = 1;
-  ((uint32_t*)data)[0] = (uint8_t)(msg->m_state & (0xFF >> (8 - 3)));
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_sdc_status & (0xFF >> (8 - 1))) << 3;
+  ((volatile uint32_t*)data)[0] = (uint8_t)(msg->m_state & (0xFF >> (8 - 3)));
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_sdc_status & (0xFF >> (8 - 1))) << 3;
 }
 static void canzero_serialize_canzero_message_led_board_stream_config_hash(canzero_message_led_board_stream_config_hash* msg, canzero_frame* frame) {
-  uint8_t* data = frame->data;
+  volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
   frame->id = 0x197;
   frame->dlc = 8;
-  ((uint64_t*)data)[0] = msg->m_config_hash;
+  ((volatile uint64_t*)data)[0] = msg->m_config_hash;
 }
 static void canzero_serialize_canzero_message_led_board_stream_errors(canzero_message_led_board_stream_errors* msg, canzero_frame* frame) {
-  uint8_t* data = frame->data;
+  volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
   frame->id = 0x56;
   frame->dlc = 2;
-  ((uint32_t*)data)[0] = (uint8_t)(msg->m_assertion_fault & (0xFF >> (8 - 1)));
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_error_heartbeat_miss & (0xFF >> (8 - 1))) << 1;
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_error_level_mcu_temperature & (0xFF >> (8 - 2))) << 2;
-  ((uint32_t*)data)[0] |= msg->m_last_node_missed << 4;
+  ((volatile uint32_t*)data)[0] = (uint8_t)(msg->m_assertion_fault & (0xFF >> (8 - 1)));
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_error_heartbeat_miss & (0xFF >> (8 - 1))) << 1;
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_error_level_mcu_temperature & (0xFF >> (8 - 2))) << 2;
+  ((volatile uint32_t*)data)[0] |= msg->m_last_node_missed << 4;
 }
 static void canzero_serialize_canzero_message_heartbeat_can0(canzero_message_heartbeat_can0* msg, canzero_frame* frame) {
-  uint8_t* data = frame->data;
+  volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
   frame->id = 0x1F4;
   frame->dlc = 2;
-  ((uint32_t*)data)[0] = msg->m_node_id;
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_ticks_next & (0xFF >> (8 - 7))) << 9;
+  ((volatile uint32_t*)data)[0] = msg->m_node_id;
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_ticks_next & (0xFF >> (8 - 7))) << 9;
 }
 static void canzero_serialize_canzero_message_heartbeat_can1(canzero_message_heartbeat_can1* msg, canzero_frame* frame) {
-  uint8_t* data = frame->data;
+  volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
   frame->id = 0x1F3;
   frame->dlc = 2;
-  ((uint32_t*)data)[0] = msg->m_node_id;
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_ticks_next & (0xFF >> (8 - 7))) << 9;
+  ((volatile uint32_t*)data)[0] = msg->m_node_id;
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
+  ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_ticks_next & (0xFF >> (8 - 7))) << 9;
 }
 static void canzero_deserialize_canzero_message_get_req(canzero_frame* frame, canzero_message_get_req* msg) {
   uint8_t* data = frame->data;
@@ -1090,8 +1090,14 @@ void canzero_can0_poll() {
       case 0x70:
         canzero_handle_mother_board_stream_led_board_command(&frame);
         break;
+      case 0x90:
+        canzero_handle_mother_board_stream_state(&frame);
+        break;
       case 0x50:
         canzero_handle_mother_board_stream_errors(&frame);
+        break;
+      case 0x52:
+        canzero_handle_input_board_stream_errors(&frame);
         break;
       case 0x1F4:
         canzero_handle_heartbeat_can0(&frame);
@@ -1105,12 +1111,6 @@ void canzero_can1_poll() {
     switch (frame.id) {
       case 0x1DE:
         canzero_handle_set_req(&frame);
-        break;
-      case 0x90:
-        canzero_handle_mother_board_stream_state(&frame);
-        break;
-      case 0x52:
-        canzero_handle_input_board_stream_errors(&frame);
         break;
       case 0x1F3:
         canzero_handle_heartbeat_can1(&frame);
@@ -1173,7 +1173,7 @@ uint32_t canzero_update_continue(uint32_t time){
 #define BUILD_MIN   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_MIN)
 #define BUILD_SEC   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_SEC)
 void canzero_init() {
-  __oe_config_hash = 2876945102520670225ull;
+  __oe_config_hash = 6539638737812168659ull;
   __oe_build_time = {
     .m_year = BUILD_YEAR,
     .m_month = BUILD_MONTH,

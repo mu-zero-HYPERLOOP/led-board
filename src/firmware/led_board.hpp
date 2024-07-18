@@ -35,11 +35,14 @@ static constexpr uint16_t IDX_TEMPERATURE_SYSTEM = 2;
 static constexpr uint16_t IDX_SDC_STATUS = 3;
 
 static constexpr uint8_t DISPLAY_NUM_ROWS = 4;
-static constexpr uint32_t COLOR_OK = 0x00ff00;
-static constexpr uint32_t COLOR_ERROR = 0xff0000;
+static constexpr uint32_t COLOR_OK = 0x007f00;
+static constexpr uint32_t COLOR_INFO = 0x00007f;
+
+static constexpr uint32_t COLOR_WARNING = 0x7f7f00;
+static constexpr uint32_t COLOR_ERROR = 0x7f0000;
 
 static constexpr uint32_t COLOR_SDC_OPEN = 0x000000;
-static constexpr uint32_t COLOR_SDC_CLOSED = 0xffea00;
+static constexpr uint32_t COLOR_SDC_CLOSED = 0x00007f;
 
 static constexpr uint32_t COLOR_MUZERO = 0x00ffb0;
 

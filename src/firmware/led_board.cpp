@@ -151,9 +151,9 @@ uint32_t error_level_to_color(error_level lvl) {
   case error_level_OK:
     return led_board::COLOR_OK;
   case error_level_INFO:
-      return linear_interpolate(led_board::COLOR_OK, led_board::COLOR_ERROR, 0.2f);
+      return led_board::COLOR_INFO;
   case error_level_WARNING:
-      return linear_interpolate(led_board::COLOR_OK, led_board::COLOR_ERROR, 0.6f);
+      return led_board::COLOR_WARNING;
   case error_level_ERROR:
     return led_board::COLOR_ERROR;
   default:

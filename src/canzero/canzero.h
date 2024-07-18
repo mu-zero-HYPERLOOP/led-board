@@ -215,8 +215,8 @@ static inline global_command canzero_get_global_command() {
   extern global_command __oe_global_command;
   return __oe_global_command;
 }
-static inline error_flag canzero_get_mother_board_error_any() {
-  extern error_flag __oe_mother_board_error_any;
+static inline error_level canzero_get_mother_board_error_any() {
+  extern error_level __oe_mother_board_error_any;
   return __oe_mother_board_error_any;
 }
 static inline error_level canzero_get_mother_board_error_level_over_temperature_system() {
@@ -244,30 +244,30 @@ typedef struct {
   led_board_state m_state;
   sdc_status m_sdc_status;
 } canzero_message_led_board_stream_state;
-static const uint32_t canzero_message_led_board_stream_state_id = 0x76;
+static const uint32_t canzero_message_led_board_stream_state_id = 0x97;
 typedef struct {
   uint64_t m_config_hash;
 } canzero_message_led_board_stream_config_hash;
-static const uint32_t canzero_message_led_board_stream_config_hash_id = 0x197;
+static const uint32_t canzero_message_led_board_stream_config_hash_id = 0x57;
 typedef struct {
   error_flag m_assertion_fault;
   error_flag m_error_heartbeat_miss;
   error_level m_error_level_mcu_temperature;
   uint8_t m_last_node_missed;
 } canzero_message_led_board_stream_errors;
-static const uint32_t canzero_message_led_board_stream_errors_id = 0x56;
+static const uint32_t canzero_message_led_board_stream_errors_id = 0x77;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can0;
-static const uint32_t canzero_message_heartbeat_can0_id = 0x1F4;
+static const uint32_t canzero_message_heartbeat_can0_id = 0x1F5;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can1;
-static const uint32_t canzero_message_heartbeat_can1_id = 0x1F3;
+static const uint32_t canzero_message_heartbeat_can1_id = 0x1F4;
 typedef struct {
   get_req_header m_header;
 } canzero_message_get_req;
@@ -280,21 +280,21 @@ static const uint32_t canzero_message_set_req_id = 0x1DE;
 typedef struct {
   led_board_command m_led_board_command;
 } canzero_message_mother_board_stream_led_board_command;
-static const uint32_t canzero_message_mother_board_stream_led_board_command_id = 0x70;
+static const uint32_t canzero_message_mother_board_stream_led_board_command_id = 0x71;
 typedef struct {
   global_state m_state;
   global_command m_command;
   sdc_status m_system_sdc_status;
 } canzero_message_mother_board_stream_state;
-static const uint32_t canzero_message_mother_board_stream_state_id = 0x90;
+static const uint32_t canzero_message_mother_board_stream_state_id = 0x91;
 typedef struct {
   error_flag m_error_heartbeat_miss;
-  error_flag m_error_any;
+  error_level m_error_any;
   error_level m_error_level_over_temperature_system;
   error_level m_error_level_config_consistency;
   uint8_t m_last_node_missed;
 } canzero_message_mother_board_stream_errors;
-static const uint32_t canzero_message_mother_board_stream_errors_id = 0x50;
+static const uint32_t canzero_message_mother_board_stream_errors_id = 0x51;
 typedef struct {
   error_flag m_assertion_fault;
   error_flag m_error_acceleration_out_of_range;
@@ -321,7 +321,7 @@ typedef struct {
   error_level m_error_level_bat24_over_voltage;
   error_level m_error_level_bat24_over_current;
 } canzero_message_input_board_stream_errors;
-static const uint32_t canzero_message_input_board_stream_errors_id = 0x52;
+static const uint32_t canzero_message_input_board_stream_errors_id = 0x53;
 void canzero_can0_poll();
 void canzero_can1_poll();
 uint32_t canzero_update_continue(uint32_t delta_time);
@@ -381,8 +381,8 @@ static inline void canzero_set_global_command(global_command value){
   __oe_global_command = value;
 }
 
-static inline void canzero_set_mother_board_error_any(error_flag value){
-  extern error_flag __oe_mother_board_error_any;
+static inline void canzero_set_mother_board_error_any(error_level value){
+  extern error_level __oe_mother_board_error_any;
   __oe_mother_board_error_any = value;
 }
 

@@ -10,7 +10,7 @@ static void can_defaults() {
 
   canzero_set_global_state(global_state_INIT);
   canzero_set_global_command(global_command_NONE);
-  canzero_set_mother_board_error_any(error_flag_OK);
+  canzero_set_mother_board_error_any(error_level_OK);
   canzero_set_mother_board_system_sdc_status(sdc_status_OPEN);
   canzero_set_mother_board_error_level_over_temperature_system(error_level_OK);
 

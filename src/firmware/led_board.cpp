@@ -176,11 +176,11 @@ void led_board::update() {
   // === update display ===
   if (led_board::display_update_interval.next()) {
     display.setCursor(0, 0);
-    display.printf("State:");
+    display.printf("State:              ");
     display.setCursor(0, 1);
     display.printf("~%s", global_state_to_str(canzero_get_global_state()));
     display.setCursor(0, 2);
-    display.printf("Command:");
+    display.printf("Command:            ");
     display.setCursor(0, 3);
     display.printf("~%s", global_command_to_str(canzero_get_global_command()));
   }

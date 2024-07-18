@@ -291,6 +291,7 @@ typedef struct {
   error_flag m_error_heartbeat_miss;
   error_flag m_error_any;
   error_level m_error_level_over_temperature_system;
+  error_level m_error_level_config_consistency;
   uint8_t m_last_node_missed;
 } canzero_message_mother_board_stream_errors;
 static const uint32_t canzero_message_mother_board_stream_errors_id = 0x50;

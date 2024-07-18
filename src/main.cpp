@@ -48,8 +48,6 @@ int main() {
         static_cast<float>(main_loop_interval_timer.frequency()));
 
     canzero_update_continue(canzero_get_time());
-
-    canzero_update_continue(canzero_get_time());
   }
 
 }

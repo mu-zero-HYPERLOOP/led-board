@@ -9,8 +9,8 @@
 
 static constexpr uint16_t num_pixels = led_board::STRIP_2_NUM_PIXELS;
 static constexpr float width = 0.2f;
-static constexpr Duration animation_time = 5_s;
-static constexpr Duration initial_delay = 1_s;
+static constexpr Duration animation_time = 1_s;
+static constexpr Duration initial_delay = 9_s;
 
 
 led_board_state fsm::states::startup_ease_out(
@@ -23,10 +23,12 @@ led_board_state fsm::states::startup_ease_out(
     led_board::strip_3.show();
     return led_board_state_STARTUP;
   }
+  
   float t = std::clamp((time_since_last_transition.as_ms() - initial_delay.as_ms()) /(float) animation_time.as_ms(), 0.0f, 1.0f);
   if (t == 1.0f) {
-    return led_board_state_RAINBOW;
+    return led_board_state_PULSATE;
   }
+  /*
   t = ease_out_quint(t);
   for (int i = 0; i < num_pixels; ++i) {
     float x = i /(float) num_pixels; // x in [0,1)
@@ -34,7 +36,7 @@ led_board_state fsm::states::startup_ease_out(
 
     led_board::strip_2.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * led_board::COLOR_MUZERO));
     led_board::strip_3.setPixelColor(i, Adafruit_NeoPixel::gamma32(my_color * led_board::COLOR_MUZERO));
-  }
+  }*/
 
   led_board::strip_2.show();
   led_board::strip_3.show();

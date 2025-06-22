@@ -19,4 +19,6 @@ led_board_state breathe_color(led_board_command cmd, Duration time_since_last_tr
 
 led_board_state shutdown(led_board_command cmd, Duration time_since_last_transition);
 
+led_board_state pulsate(led_board_command cmd, Duration time_since_last_transition);
+
 }

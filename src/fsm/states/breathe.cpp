@@ -12,15 +12,16 @@
 #include "Arduino.h"
 
 static constexpr uint16_t num_pixels = led_board::STRIP_2_NUM_PIXELS;
-static constexpr Frequency freq = 0.1_Hz;
+static constexpr Frequency freq = 0.5_Hz;
 static constexpr Duration animation_time = 5_s;
 static constexpr Duration initial_delay = 0_s;
 static constexpr float min_brightness = 0.0f;
 static constexpr float max_brightness = 1.0f;
 static constexpr uint16_t center = num_pixels / 2;
-static constexpr Duration pixel_offset = 200_ms;
+static constexpr Duration pixel_offset = 100_ms;
 static constexpr uint32_t color_1 = led_board::COLOR_MUZERO;
-static constexpr uint32_t color_2 = 0x00c0c0;
+static constexpr uint32_t color_2 = 0xb000ff;
+//static constexpr uint32_t color_2 = 0x00c0c0;
 //static constexpr uint32_t color_2 = 0xff0000;
 
 

@@ -111,6 +111,7 @@ typedef enum {
   led_board_state_BREATHE = 3,
   led_board_state_RAINBOW = 4,
   led_board_state_SHUTDOWN = 5,
+  led_board_state_PULSATE = 6,
 } led_board_state;
 typedef struct {
   uint16_t m_year;

@@ -2,6 +2,7 @@
 #include "canzero/canzero.h"
 #include "util/timestamp.h"
 #include "fsm/states.hpp"
+#include "print.h"
 
 static Timestamp fsm_last_transition = Timestamp::now();
 
@@ -33,6 +34,7 @@ void fsm::update() {
       next_state = states::startup_ease_out(cmd, time_since_last_transition);
       break;
     case led_board_state_LIFTOFF:
+      next_state = states::liftoff(cmd, time_since_last_transition);
       break;
     case led_board_state_BREATHE:
       next_state = states::breathe_color(cmd, time_since_last_transition);
@@ -43,12 +45,17 @@ void fsm::update() {
     case led_board_state_RAINBOW:
       next_state = states::rainbow_hue(cmd, time_since_last_transition);
       break;
+    case led_board_state_PULSATE:
+      next_state = states::pulsate(cmd, time_since_last_transition);
+      break;
     }
 
     if (state != next_state) {
       fsm_last_transition = now;
       canzero_set_state(next_state);
       canzero_update_continue(canzero_get_time());
+      debugPrintf("Current state: %d\n", canzero_get_state());
+      
     }
   } while (next_state != state);
 }

@@ -25,7 +25,7 @@ led_board_state fsm::states::startup_ease_out(
   }
   float t = std::clamp((time_since_last_transition.as_ms() - initial_delay.as_ms()) /(float) animation_time.as_ms(), 0.0f, 1.0f);
   if (t == 1.0f) {
-    return led_board_state_BREATHE;
+    return led_board_state_RAINBOW;
   }
   t = ease_out_quint(t);
   for (int i = 0; i < num_pixels; ++i) {

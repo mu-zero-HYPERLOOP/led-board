@@ -26,16 +26,19 @@ float DMAMEM __oe_mcu_temperature;
 error_level_config DMAMEM __oe_error_level_config_mcu_temperature;
 global_state DMAMEM __oe_global_state;
 global_command DMAMEM __oe_global_command;
-error_level DMAMEM __oe_mother_board_error_any;
-error_level DMAMEM __oe_mother_board_error_level_over_temperature_system;
-sdc_status DMAMEM __oe_mother_board_system_sdc_status;
+error_level DMAMEM __oe_error_any;
+error_level DMAMEM __oe_error_level_over_temperature_system;
+sdc_status DMAMEM __oe_system_sdc_status;
 error_level DMAMEM __oe_input_board_error_level_bat24_under_voltage;
+float DMAMEM __oe_cooling_cycle_temp_begin;
+float DMAMEM __oe_cooling_cycle_temp_end;
+sdc_status DMAMEM __oe_mother_board_system_sdc_status;
 static void canzero_serialize_canzero_message_get_resp(canzero_message_get_resp* msg, canzero_frame* frame) {
   volatile uint8_t* data = (volatile uint8_t*)frame->data;
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x1BD;
+  frame->id = 0x13D;
   frame->dlc = 8;
   ((volatile uint32_t*)data)[0] = (uint8_t)(msg->m_header.m_sof & (0xFF >> (8 - 1)));
   ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_header.m_eof & (0xFF >> (8 - 1))) << 1;
@@ -50,7 +53,7 @@ static void canzero_serialize_canzero_message_set_resp(canzero_message_set_resp*
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x1DD;
+  frame->id = 0x15D;
   frame->dlc = 4;
   ((volatile uint32_t*)data)[0] = (uint16_t)(msg->m_header.m_od_index & (0xFFFF >> (16 - 13)));
   ((volatile uint32_t*)data)[0] |= msg->m_header.m_client_id << 13;
@@ -62,7 +65,7 @@ static void canzero_serialize_canzero_message_led_board_stream_state(canzero_mes
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x97;
+  frame->id = 0x72;
   frame->dlc = 1;
   ((volatile uint32_t*)data)[0] = (uint8_t)(msg->m_state & (0xFF >> (8 - 3)));
   ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_sdc_status & (0xFF >> (8 - 1))) << 3;
@@ -72,7 +75,7 @@ static void canzero_serialize_canzero_message_led_board_stream_config_hash(canze
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x57;
+  frame->id = 0x113;
   frame->dlc = 8;
   ((volatile uint64_t*)data)[0] = msg->m_config_hash;
 }
@@ -81,7 +84,7 @@ static void canzero_serialize_canzero_message_led_board_stream_errors(canzero_me
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x77;
+  frame->id = 0x52;
   frame->dlc = 2;
   ((volatile uint32_t*)data)[0] = (uint8_t)(msg->m_assertion_fault & (0xFF >> (8 - 1)));
   ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_error_heartbeat_miss & (0xFF >> (8 - 1))) << 1;
@@ -93,7 +96,7 @@ static void canzero_serialize_canzero_message_heartbeat_can0(canzero_message_hea
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x1F5;
+  frame->id = 0x16F;
   frame->dlc = 2;
   ((volatile uint32_t*)data)[0] = msg->m_node_id;
   ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
@@ -104,7 +107,7 @@ static void canzero_serialize_canzero_message_heartbeat_can1(canzero_message_hea
   for(uint8_t i = 0; i < 8; ++i){
     data[i] = 0;
   }
-  frame->id = 0x1F4;
+  frame->id = 0x16E;
   frame->dlc = 2;
   ((volatile uint32_t*)data)[0] = msg->m_node_id;
   ((volatile uint32_t*)data)[0] |= (uint8_t)(msg->m_unregister & (0xFF >> (8 - 1))) << 8;
@@ -126,17 +129,26 @@ static void canzero_deserialize_canzero_message_set_req(canzero_frame* frame, ca
   msg->m_header.m_server_id = ((((uint32_t*)data)[0] >> 24) & (0xFFFFFFFF >> (32 - 8)));
   msg->m_data = (((uint32_t*)data)[1] & (0xFFFFFFFF >> (32 - 32)));
 }
-static void canzero_deserialize_canzero_message_mother_board_stream_led_board_command(canzero_frame* frame, canzero_message_mother_board_stream_led_board_command* msg) {
+static void canzero_deserialize_canzero_message_input_board_stream_cooling_cycle(canzero_frame* frame, canzero_message_input_board_stream_cooling_cycle* msg) {
+  uint8_t* data = frame->data;
+  msg->m_cooling_flow_rate_begin = (((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 16))) * 0.006103608758678569 + 0;
+  msg->m_cooling_flow_rate_end = ((((uint32_t*)data)[0] >> 16) & (0xFFFFFFFF >> (32 - 16))) * 0.006103608758678569 + 0;
+  msg->m_cooling_cycle_temp_begin = (((uint32_t*)data)[1] & (0xFFFFFFFF >> (32 - 8))) * 0.592156862745098 + -1;
+  msg->m_cooling_cycle_temp_end = ((((uint32_t*)data)[1] >> 8) & (0xFFFFFFFF >> (32 - 8))) * 0.592156862745098 + -1;
+}
+static void canzero_deserialize_canzero_message_input_board_stream_led_board_command(canzero_frame* frame, canzero_message_input_board_stream_led_board_command* msg) {
   uint8_t* data = frame->data;
   msg->m_led_board_command = (led_board_command)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 1)));
 }
-static void canzero_deserialize_canzero_message_mother_board_stream_state(canzero_frame* frame, canzero_message_mother_board_stream_state* msg) {
+static void canzero_deserialize_canzero_message_input_board_stream_state(canzero_frame* frame, canzero_message_input_board_stream_state* msg) {
   uint8_t* data = frame->data;
-  msg->m_state = (global_state)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 5)));
-  msg->m_command = (global_command)((((uint32_t*)data)[0] >> 5) & (0xFFFFFFFF >> (32 - 4)));
+  msg->m_global_state = (global_state)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 5)));
+  msg->m_global_command = (global_command)((((uint32_t*)data)[0] >> 5) & (0xFFFFFFFF >> (32 - 4)));
   msg->m_system_sdc_status = (sdc_status)((((uint32_t*)data)[0] >> 9) & (0xFFFFFFFF >> (32 - 1)));
+  msg->m_state = (global_state)((((uint32_t*)data)[0] >> 10) & (0xFFFFFFFF >> (32 - 5)));
+  msg->m_command = (global_command)((((uint32_t*)data)[0] >> 15) & (0xFFFFFFFF >> (32 - 4)));
 }
-static void canzero_deserialize_canzero_message_mother_board_stream_errors(canzero_frame* frame, canzero_message_mother_board_stream_errors* msg) {
+static void canzero_deserialize_canzero_message_input_board_stream_global_fsm_errors(canzero_frame* frame, canzero_message_input_board_stream_global_fsm_errors* msg) {
   uint8_t* data = frame->data;
   msg->m_error_heartbeat_miss = (error_flag)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 1)));
   msg->m_error_any = (error_level)((((uint32_t*)data)[0] >> 1) & (0xFFFFFFFF >> (32 - 2)));
@@ -353,7 +365,7 @@ static void schedule_get_resp_fragmentation_job(uint32_t *fragmentation_buffer, 
 }
 
 static job_t heartbeat_job;
-static const uint32_t heartbeat_interval = 137;
+static const uint32_t heartbeat_interval = 100 + 3 * CANZERO_NODE_ID;
 static void schedule_heartbeat_job() {
   heartbeat_job.climax = canzero_get_time();
   heartbeat_job.tag = HEARTBEAT_JOB_TAG;
@@ -448,7 +460,7 @@ static void schedule_jobs(uint32_t time) {
         stream_message.m_sdc_status = __oe_sdc_status;
         canzero_frame stream_frame;
         canzero_serialize_canzero_message_led_board_stream_state(&stream_message, &stream_frame);
-        canzero_can0_send(&stream_frame);
+        canzero_can1_send(&stream_frame);
         break;
       }
       case 1: {
@@ -459,7 +471,7 @@ static void schedule_jobs(uint32_t time) {
         stream_message.m_config_hash = __oe_config_hash;
         canzero_frame stream_frame;
         canzero_serialize_canzero_message_led_board_stream_config_hash(&stream_message, &stream_frame);
-        canzero_can1_send(&stream_frame);
+        canzero_can0_send(&stream_frame);
         break;
       }
       case 2: {
@@ -473,7 +485,7 @@ static void schedule_jobs(uint32_t time) {
         stream_message.m_last_node_missed = __oe_last_node_missed;
         canzero_frame stream_frame;
         canzero_serialize_canzero_message_led_board_stream_errors(&stream_message, &stream_frame);
-        canzero_can1_send(&stream_frame);
+        canzero_can0_send(&stream_frame);
         break;
       }
         default:
@@ -553,7 +565,7 @@ static void schedule_jobs(uint32_t time) {
         canzero_exit_critical();
         canzero_frame fragmentation_frame;
         canzero_serialize_canzero_message_get_resp(&fragmentation_response, &fragmentation_frame);
-        canzero_can0_send(&fragmentation_frame);
+        canzero_can1_send(&fragmentation_frame);
         break;
       }
       default: {
@@ -710,21 +722,21 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     break;
   }
   case 14: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_any) & (0xFF >> (8 - 2)))) << 0;
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_error_any) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
   case 15: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_level_over_temperature_system) & (0xFF >> (8 - 2)))) << 0;
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_error_level_over_temperature_system) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
   case 16: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
@@ -737,13 +749,34 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     resp.m_header.m_toggle = 0;
     break;
   }
+  case 18: {
+    resp.m_data |= min_u32((__oe_cooling_cycle_temp_begin - (-1)) / 0.592156862745098, 0xFF) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
+  case 19: {
+    resp.m_data |= min_u32((__oe_cooling_cycle_temp_end - (-1)) / 0.592156862745098, 0xFF) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
+  case 20: {
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
   }
   resp.m_header.m_od_index = msg.m_header.m_od_index;
   resp.m_header.m_client_id = msg.m_header.m_client_id;
   resp.m_header.m_server_id = msg.m_header.m_server_id;
   canzero_frame resp_frame;
   canzero_serialize_canzero_message_get_resp(&resp, &resp_frame);
-  canzero_can0_send(&resp_frame);
+  canzero_can1_send(&resp_frame);
 }
 static uint32_t DMAMEM config_hash_tmp_tx_fragmentation_buffer[2];
 static uint32_t DMAMEM config_hash_tmp_tx_fragmentation_offset = 0;
@@ -952,27 +985,27 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
-    error_level mother_board_error_any_tmp;
-    mother_board_error_any_tmp = ((error_level)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
-    canzero_set_mother_board_error_any(mother_board_error_any_tmp);
+    error_level error_any_tmp;
+    error_any_tmp = ((error_level)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
+    canzero_set_error_any(error_any_tmp);
     break;
   }
   case 15 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
-    error_level mother_board_error_level_over_temperature_system_tmp;
-    mother_board_error_level_over_temperature_system_tmp = ((error_level)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
-    canzero_set_mother_board_error_level_over_temperature_system(mother_board_error_level_over_temperature_system_tmp);
+    error_level error_level_over_temperature_system_tmp;
+    error_level_over_temperature_system_tmp = ((error_level)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
+    canzero_set_error_level_over_temperature_system(error_level_over_temperature_system_tmp);
     break;
   }
   case 16 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
-    sdc_status mother_board_system_sdc_status_tmp;
-    mother_board_system_sdc_status_tmp = ((sdc_status)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
-    canzero_set_mother_board_system_sdc_status(mother_board_system_sdc_status_tmp);
+    sdc_status system_sdc_status_tmp;
+    system_sdc_status_tmp = ((sdc_status)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
+    canzero_set_system_sdc_status(system_sdc_status_tmp);
     break;
   }
   case 17 : {
@@ -984,6 +1017,33 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_input_board_error_level_bat24_under_voltage(input_board_error_level_bat24_under_voltage_tmp);
     break;
   }
+  case 18 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
+    float cooling_cycle_temp_begin_tmp;
+    cooling_cycle_temp_begin_tmp = (float)(((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 8))) * 0.592156862745098 + -1);
+    canzero_set_cooling_cycle_temp_begin(cooling_cycle_temp_begin_tmp);
+    break;
+  }
+  case 19 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
+    float cooling_cycle_temp_end_tmp;
+    cooling_cycle_temp_end_tmp = (float)(((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 8))) * 0.592156862745098 + -1);
+    canzero_set_cooling_cycle_temp_end(cooling_cycle_temp_end_tmp);
+    break;
+  }
+  case 20 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
+    sdc_status mother_board_system_sdc_status_tmp;
+    mother_board_system_sdc_status_tmp = ((sdc_status)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
+    canzero_set_mother_board_system_sdc_status(mother_board_system_sdc_status_tmp);
+    break;
+  }
   default:
     return;
   }
@@ -993,26 +1053,32 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
   resp.m_header.m_erno = set_resp_erno_Success;
   canzero_frame resp_frame;
   canzero_serialize_canzero_message_set_resp(&resp, &resp_frame);
-  canzero_can1_send(&resp_frame);
+  canzero_can0_send(&resp_frame);
 
 }
-static void canzero_handle_mother_board_stream_led_board_command(canzero_frame* frame) {
-  canzero_message_mother_board_stream_led_board_command msg;
-  canzero_deserialize_canzero_message_mother_board_stream_led_board_command(frame, &msg);
+static void canzero_handle_input_board_stream_cooling_cycle(canzero_frame* frame) {
+  canzero_message_input_board_stream_cooling_cycle msg;
+  canzero_deserialize_canzero_message_input_board_stream_cooling_cycle(frame, &msg);
+  canzero_set_cooling_cycle_temp_begin(msg.m_cooling_cycle_temp_begin);
+  canzero_set_cooling_cycle_temp_end(msg.m_cooling_cycle_temp_end);
+}
+static void canzero_handle_input_board_stream_led_board_command(canzero_frame* frame) {
+  canzero_message_input_board_stream_led_board_command msg;
+  canzero_deserialize_canzero_message_input_board_stream_led_board_command(frame, &msg);
   canzero_set_command(msg.m_led_board_command);
 }
-static void canzero_handle_mother_board_stream_state(canzero_frame* frame) {
-  canzero_message_mother_board_stream_state msg;
-  canzero_deserialize_canzero_message_mother_board_stream_state(frame, &msg);
+static void canzero_handle_input_board_stream_state(canzero_frame* frame) {
+  canzero_message_input_board_stream_state msg;
+  canzero_deserialize_canzero_message_input_board_stream_state(frame, &msg);
+  canzero_set_mother_board_system_sdc_status(msg.m_system_sdc_status);
   canzero_set_global_state(msg.m_state);
   canzero_set_global_command(msg.m_command);
-  canzero_set_mother_board_system_sdc_status(msg.m_system_sdc_status);
 }
-static void canzero_handle_mother_board_stream_errors(canzero_frame* frame) {
-  canzero_message_mother_board_stream_errors msg;
-  canzero_deserialize_canzero_message_mother_board_stream_errors(frame, &msg);
-  canzero_set_mother_board_error_any(msg.m_error_any);
-  canzero_set_mother_board_error_level_over_temperature_system(msg.m_error_level_over_temperature_system);
+static void canzero_handle_input_board_stream_global_fsm_errors(canzero_frame* frame) {
+  canzero_message_input_board_stream_global_fsm_errors msg;
+  canzero_deserialize_canzero_message_input_board_stream_global_fsm_errors(frame, &msg);
+  canzero_set_error_any(msg.m_error_any);
+  canzero_set_error_level_over_temperature_system(msg.m_error_level_over_temperature_system);
 }
 static void canzero_handle_input_board_stream_errors(canzero_frame* frame) {
   canzero_message_input_board_stream_errors msg;
@@ -1085,19 +1151,22 @@ void canzero_can0_poll() {
   canzero_frame frame;
   while (canzero_can0_recv(&frame)) {
     switch (frame.id) {
-      case 0x1BE:
-        canzero_handle_get_req(&frame);
+      case 0x15E:
+        canzero_handle_set_req(&frame);
         break;
-      case 0x71:
-        canzero_handle_mother_board_stream_led_board_command(&frame);
+      case 0x4D:
+        canzero_handle_input_board_stream_cooling_cycle(&frame);
         break;
-      case 0x91:
-        canzero_handle_mother_board_stream_state(&frame);
+      case 0xCD:
+        canzero_handle_input_board_stream_state(&frame);
         break;
-      case 0x53:
+      case 0x8D:
+        canzero_handle_input_board_stream_global_fsm_errors(&frame);
+        break;
+      case 0x6D:
         canzero_handle_input_board_stream_errors(&frame);
         break;
-      case 0x1F5:
+      case 0x16F:
         canzero_handle_heartbeat_can0(&frame);
         break;
     }
@@ -1107,13 +1176,13 @@ void canzero_can1_poll() {
   canzero_frame frame;
   while (canzero_can1_recv(&frame)) {
     switch (frame.id) {
-      case 0x1DE:
-        canzero_handle_set_req(&frame);
+      case 0x13E:
+        canzero_handle_get_req(&frame);
         break;
-      case 0x51:
-        canzero_handle_mother_board_stream_errors(&frame);
+      case 0xAD:
+        canzero_handle_input_board_stream_led_board_command(&frame);
         break;
-      case 0x1F4:
+      case 0x16E:
         canzero_handle_heartbeat_can1(&frame);
         break;
     }
@@ -1174,7 +1243,7 @@ uint32_t canzero_update_continue(uint32_t time){
 #define BUILD_MIN   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_MIN)
 #define BUILD_SEC   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_SEC)
 void canzero_init() {
-  __oe_config_hash = 13882419005926253559ull;
+  __oe_config_hash = 17424413621202870046ull;
   __oe_build_time = {
     .m_year = BUILD_YEAR,
     .m_month = BUILD_MONTH,
@@ -1265,7 +1334,7 @@ void canzero_send_config_hash() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
   schedule_get_resp_fragmentation_job(__oe_config_hash_send_fragmentation_buffer, 2, 0, 255);
 
 }
@@ -1287,7 +1356,7 @@ void canzero_send_build_time() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
   schedule_get_resp_fragmentation_job(__oe_build_time_send_fragmentation_buffer, 2, 1, 255);
 
 }
@@ -1302,7 +1371,7 @@ void canzero_send_state() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_sdc_status() {
   canzero_message_get_resp msg;
@@ -1315,7 +1384,7 @@ void canzero_send_sdc_status() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_assertion_fault() {
   canzero_message_get_resp msg;
@@ -1328,7 +1397,7 @@ void canzero_send_assertion_fault() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_error_heartbeat_miss() {
   canzero_message_get_resp msg;
@@ -1341,7 +1410,7 @@ void canzero_send_error_heartbeat_miss() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_error_level_mcu_temperature() {
   canzero_message_get_resp msg;
@@ -1354,7 +1423,7 @@ void canzero_send_error_level_mcu_temperature() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_command() {
   canzero_message_get_resp msg;
@@ -1367,7 +1436,7 @@ void canzero_send_command() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_loop_frequency() {
   canzero_message_get_resp msg;
@@ -1385,7 +1454,7 @@ void canzero_send_loop_frequency() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
   schedule_get_resp_fragmentation_job(__oe_loop_frequency_send_fragmentation_buffer, 2, 8, 255);
 
 }
@@ -1400,7 +1469,7 @@ void canzero_send_last_node_missed() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_mcu_temperature() {
   canzero_message_get_resp msg;
@@ -1413,7 +1482,7 @@ void canzero_send_mcu_temperature() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_error_level_config_mcu_temperature() {
   canzero_message_get_resp msg;
@@ -1436,7 +1505,7 @@ void canzero_send_error_level_config_mcu_temperature() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
   schedule_get_resp_fragmentation_job(__oe_error_level_config_mcu_temperature_send_fragmentation_buffer, 7, 11, 255);
 
 }
@@ -1451,7 +1520,7 @@ void canzero_send_global_state() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_global_command() {
   canzero_message_get_resp msg;
@@ -1464,11 +1533,11 @@ void canzero_send_global_command() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
-void canzero_send_mother_board_error_any() {
+void canzero_send_error_any() {
   canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_any) & (0xFF >> (8 - 2)))) << 0;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_error_any) & (0xFF >> (8 - 2)))) << 0;
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
@@ -1477,11 +1546,11 @@ void canzero_send_mother_board_error_any() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
-void canzero_send_mother_board_error_level_over_temperature_system() {
+void canzero_send_error_level_over_temperature_system() {
   canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_error_level_over_temperature_system) & (0xFF >> (8 - 2)))) << 0;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_error_level_over_temperature_system) & (0xFF >> (8 - 2)))) << 0;
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
@@ -1490,11 +1559,11 @@ void canzero_send_mother_board_error_level_over_temperature_system() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
-void canzero_send_mother_board_system_sdc_status() {
+void canzero_send_system_sdc_status() {
   canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
@@ -1503,7 +1572,7 @@ void canzero_send_mother_board_system_sdc_status() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
 }
 void canzero_send_input_board_error_level_bat24_under_voltage() {
   canzero_message_get_resp msg;
@@ -1516,5 +1585,44 @@ void canzero_send_input_board_error_level_bat24_under_voltage() {
   msg.m_header.m_server_id = node_id_led_board;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can0_send(&sender_frame);
+  canzero_can1_send(&sender_frame);
+}
+void canzero_send_cooling_cycle_temp_begin() {
+  canzero_message_get_resp msg;
+  msg.m_data |= min_u32((__oe_cooling_cycle_temp_begin - (-1)) / 0.592156862745098, 0xFF) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 18;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_led_board;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can1_send(&sender_frame);
+}
+void canzero_send_cooling_cycle_temp_end() {
+  canzero_message_get_resp msg;
+  msg.m_data |= min_u32((__oe_cooling_cycle_temp_end - (-1)) / 0.592156862745098, 0xFF) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 19;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_led_board;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can1_send(&sender_frame);
+}
+void canzero_send_mother_board_system_sdc_status() {
+  canzero_message_get_resp msg;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_mother_board_system_sdc_status) & (0xFF >> (8 - 1)))) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 20;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_led_board;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can1_send(&sender_frame);
 }
